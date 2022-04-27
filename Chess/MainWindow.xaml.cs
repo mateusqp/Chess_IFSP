@@ -24,5 +24,12 @@ namespace Chess
         {
             InitializeComponent();
         }
+
+        private void Play(object sender, RoutedEventArgs e)
+        {
+            Hide();
+            GameWindow game = new GameWindow();
+            game.Show();
+        }
     }
 }
