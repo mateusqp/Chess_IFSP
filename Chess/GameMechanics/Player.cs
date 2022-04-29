@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Chess.GameMechanics
 {
-    class Player
+    public class Player
     {
-        string username;
-        int rating;
-        int photoID;
+        public string username;
+        public int rating;
+        public int photoID;
 
         public Player()
         {

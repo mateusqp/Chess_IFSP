@@ -8,19 +8,21 @@ namespace Chess.GameMechanics
 {
     public class Piece
     {
-        public Square pos; //position on board
-        public bool team; //0 = black ; 1 = White
+        public Coordinate pos; //position on board
+        public bool team; //false = black ; true = White
         public char type; //p = pawn, r = rook; n = knight; b = bishop; q = queen; k = king
-        public bool possiblePassant; //0 = impossible ; 1 = possible
+        public bool possiblePassant; //false = impossible ; true = possible
         public bool hasMoved; //For castling
+        public bool exists;
 
-        public Piece(char type, bool team, Square pos)
+        public Piece(char type, bool team, Coordinate pos)
         {
             this.pos = pos;
             this.team = team;
             this.type = type;
             possiblePassant = false;
             hasMoved = false;
+            exists = true;
         }
     }
 }

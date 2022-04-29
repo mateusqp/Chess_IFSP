@@ -6,20 +6,25 @@ using System.Threading.Tasks;
 
 namespace Chess.GameMechanics
 {
-    public class Square
+    public class Coordinate
     {
         public sbyte x;
         public sbyte y;
 
-        public Square(sbyte x, sbyte y)
+        public Coordinate(sbyte x, sbyte y)
         {
             this.x = x;
             this.y = y;
         }
-        public Square(int x, int y)
+        public Coordinate(int x, int y)
         {
             this.x = (sbyte)x;
             this.y = (sbyte)y;
+        }
+
+        public Coordinate()
+        {
+
         }
     }
 }

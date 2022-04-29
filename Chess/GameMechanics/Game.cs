@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace Chess.GameMechanics
 {
-    class Game
+    public class Game
     {
-        Notation notation;
-        Timer timer;
-        Board board;
-        Player player1;
-        Player player2;
-        bool player1Color;
+        public Notation notation;
+        public Timer timer;
+        public Board board;
+        public Player player1;
+        public Player player2;
+        public bool player1Color;
+        public bool running;
 
         public Game(Timer timer, bool player1Color, Player player1, Player player2)
         {
