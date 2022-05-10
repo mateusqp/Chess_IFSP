@@ -434,11 +434,14 @@ namespace Chess.GameMechanics
         }
         public List<Coordinate> FinalPossibilities(List<Piece> pieces, Piece p)
         {
-            Piece pAux = p.DeepClone();            
+            
+            Piece pAux = p.DeepClone();
             Piece enemyRemoved = new Piece();
             List<Coordinate> ps = MovementPossibilities(p, pieces);
             List<Coordinate> psF = new List<Coordinate>();
-            
+
+            Piece takenPiece = new Piece();
+
             foreach (Coordinate c in ps)
             {
                 bool removed = false;
@@ -447,7 +450,10 @@ namespace Chess.GameMechanics
                     if (pp.pos.x == c.x && pp.pos.y == c.y)
                     {
                         enemyRemoved = pieces.Find(p2 => p2.pos.x == c.x && p2.pos.y == c.y).DeepClone();
-                        pieces.RemoveAll(p2 => p2.pos.x == c.x && p2.pos.y == c.y);
+                        takenPiece = pieces.Find(p2 => p2.pos.x == c.x && p2.pos.y == c.y);
+                        takenPiece.pos.x = 50;
+                        takenPiece.pos.y = -2;
+                        //pieces.RemoveAll(p2 => p2.pos.x == c.x && p2.pos.y == c.y);
                         removed = true;
                         break;
                     }
@@ -467,11 +473,15 @@ namespace Chess.GameMechanics
                 }
                 p.pos.x = pAux.pos.x;
                 p.pos.y = pAux.pos.y;
-                if (removed)
+
+                if(removed)
                 {
-                    pieces.Add(enemyRemoved);
+                    takenPiece.pos.x = enemyRemoved.pos.x;
+                    takenPiece.pos.y = enemyRemoved.pos.y;
                 }
+                
             }
+            
             return psF;
         }
         

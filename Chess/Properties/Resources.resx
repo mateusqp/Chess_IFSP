@@ -118,6 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="checkmate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\soundeffects\checkmate.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Chess_bdt60" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\PiecesPng\Chess_bdt60.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -159,5 +162,8 @@
   </data>
   <data name="piece_slide" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\soundeffects\piece-slide.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="stalemate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\soundeffects\stalemate.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

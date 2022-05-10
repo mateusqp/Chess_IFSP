@@ -15,9 +15,7 @@ using System.Windows.Shapes;
 using Chess.GameMechanics;
 using Chess.Properties;
 using System.Media;
-
-
-
+using Force.DeepCloner;
 
 namespace Chess
 {
@@ -31,20 +29,22 @@ namespace Chess
         static bool player1Color = true;
         static Player p1 = new();
         static Player p2 = new();
+        bool promotion = false;
         //-
         Game game = new Game(timer, player1Color, p1, p2);
-
+        
 
         string gameState = "selectPiece";
+        List<Piece> promotionPieces = new List<Piece>();
         public GameWindow()
         {
             InitializeComponent();
             DrawBoard();
 
-
+            game.running = true;
             DrawPiecesOnBoard(game.board.pieces);
             game.InvisibleCells();
-            DrawCells(game);            
+            DrawCells(game);
         }
 
         
@@ -422,6 +422,7 @@ namespace Chess
 
         private void ClickOnPiece(object sender, MouseButtonEventArgs e)
         {
+
             //Detects Piece and Coordinate
             Coordinate clickedCoordinate = new Coordinate();
             Piece clickedPiece = new Piece();
@@ -432,10 +433,10 @@ namespace Chess
                 if (sender.Equals(game.board.clickableRects[i]))
                 {
                     //Gets the clicked piece
-                    clickedCoordinate = new Coordinate((int)game.board.cells[i].x, (int)game.board.cells[i].y);                     
+                    clickedCoordinate = new Coordinate((int)game.board.cells[i].x, (int)game.board.cells[i].y);
                 }
             }
-            foreach(Piece p in game.board.pieces)
+            foreach (Piece p in game.board.pieces)
             {
                 if (p.pos.x == clickedCoordinate.x && p.pos.y == clickedCoordinate.y)
                 {
@@ -453,125 +454,329 @@ namespace Chess
                 }
             }
 
-
-
-            if (game.state == "selectPiece" && cellColor == "Invisible")
+            if (game.running && !promotion)
             {
-                foreach(Piece p in game.board.pieces)
+                
+                if (game.state == "selectPiece" && cellColor == "Invisible")
+                {
+                    foreach (Piece p in game.board.pieces)
+                    {
+                        if (p.pos.x == clickedCoordinate.x && p.pos.y == clickedCoordinate.y)
+                        {
+                            p.isClicked = true;
+                        }
+                    }
+                    game.state = "selectCoordinate";
+                    game.board.cells.Clear();
+                    game.board.clickableRects.Clear();
+                    game.RedCells(game.board.FinalPossibilities(game.board.pieces, clickedPiece));
+
+                    game.BlueCells(clickedPiece);
+
+                    ReDraw();
+                }
+
+                if (game.state == "selectCoordinate" && cellColor == "Blue")
+                {
+                    foreach (Piece p in game.board.pieces)
+                    {
+                        p.isClicked = false;
+                    }
+                    game.state = "selectPiece";
+                    game.board.cells.Clear();
+                    game.board.clickableRects.Clear();
+                    game.InvisibleCells();
+
+                    ReDraw();
+                }
+
+                if (game.state == "selectCoordinate" && cellColor == "Red")
+                {
+                    Piece p = new Piece();
+                    foreach (Piece piece in game.board.pieces)
+                    {
+                        if (piece.isClicked)
+                        {
+                            p = piece;
+                        }
+                    }
+                    p.isClicked = false;
+                    p.hasMoved = true;
+                    if (game.turn)
+                    {
+                        game.turn = false;
+                    }
+                    else
+                    {
+                        game.turn = true;
+                    }
+                    promotion = MovePiece(p, clickedCoordinate, game.board);
+                    if (!promotion)
+                    {
+                        game.state = "selectPiece";
+                        game.board.cells.Clear();
+                        game.board.clickableRects.Clear();
+                        game.InvisibleCells();
+
+                        ReDraw();
+                    }
+                }
+            }
+            if (game.running && promotion)
+            {
+                foreach (Piece p in promotionPieces)
                 {
                     if (p.pos.x == clickedCoordinate.x && p.pos.y == clickedCoordinate.y)
                     {
-                        p.isClicked = true;
+                        clickedPiece = p.DeepClone();
                     }
                 }
-                game.state = "selectCoordinate";
-                game.board.cells.Clear();
-                game.board.clickableRects.Clear();
-                if (clickedPiece.type == 'k')
+                if (game.state == "promotion" && cellColor == "BluePromotion")
                 {
-                    game.RedCells(game.board.FinalPossibilities(game.board.pieces, clickedPiece));
-                    
-                }
-                else
-                {
-                    game.RedCells(game.board.FinalPossibilities(game.board.pieces, clickedPiece));
-                }
-                
-                game.BlueCells(clickedPiece);
-
-                ReDraw();
-            }
-
-            if (game.state == "selectCoordinate" && cellColor == "Blue")
-            {
-                foreach (Piece p in game.board.pieces)
-                {
-                    p.isClicked = false;
-                }
-                game.state = "selectPiece";
-                game.board.cells.Clear();
-                game.board.clickableRects.Clear();
-                game.InvisibleCells();
-
-                ReDraw();
-            }
-
-            if (game.state == "selectCoordinate" && cellColor == "Red")
-            {                
-                Piece p = new Piece();
-                foreach (Piece piece in game.board.pieces)
-                {
-                    if (piece.isClicked)
+                    foreach (Piece p in game.board.pieces)
                     {
-                        p = piece;
+                        if (p.team)
+                        {
+                            if (p.type == 'p' && p.pos.y == 1)
+                            {
+                                p.type = clickedPiece.type;
+                            }
+                        }
+                        else
+                        {
+                            if (p.type == 'p' && p.pos.y == 9)
+                            {
+                                p.type = clickedPiece.type;
+                            }
+                        }
                     }
-                }
-                p.isClicked = false;
-                p.hasMoved = true;
-                if(game.turn)
-                {
-                    game.turn = false;
-                }
-                else
-                {
-                    game.turn = true;
-                }
-                MovePiece(p, clickedCoordinate, game.board);
-                game.state = "selectPiece";
-                game.board.cells.Clear();
-                game.board.clickableRects.Clear();
-                game.InvisibleCells();
 
-                ReDraw();
+                    promotion = false;
+                    promotionPieces.Clear();
+                    game.board.cells.Clear();
+                    game.board.clickableRects.Clear();
+                    bool team2 = true;
+                    game.InvisibleCells();
+                    ReDraw();
+                    if (clickedPiece.team)
+                    {
+                        team2 = false;
+                    }
+                    game.state = "selectPiece";
+                    CheckForMateOrStale(team2, game.board.pieces, clickedPiece);
+                }
             }
             
         }
-        void MovePiece(Piece p, Coordinate c, Board board)
+        bool MovePiece(Piece p, Coordinate c, Board board) //returns false if promotion
         {
-            int xToRemove = -1;
-            int yToRemove = -1;
-            bool hasToRemove = false;
-            foreach (Piece piece in board.pieces)
+            if (!promotion)
             {
-                if (p.team != piece.team)
+                int xToRemove = -1;
+                int yToRemove = -1;
+                bool hasToRemove = false;
+                foreach (Piece piece in board.pieces)
                 {
-                    piece.possiblePassant = false;
+                    if (p.team != piece.team)
+                    {
+                        piece.possiblePassant = false;
+                    }
                 }
-            }
-            if (p.type == 'p')
-            {
-                if (Math.Abs(p.pos.y - c.y) == 2)
+                if (p.type == 'p')
                 {
-                    p.possiblePassant = true;
+                    if (Math.Abs(p.pos.y - c.y) == 2)
+                    {
+                        p.possiblePassant = true;
+                    }
                 }
-            }
-            
 
-            foreach (Piece p2 in board.pieces)
-            {
-                if (p2.pos.x == c.x && p2.pos.y == c.y)
+
+                foreach (Piece p2 in board.pieces)
                 {
-                    xToRemove = c.x;
-                    yToRemove = c.y;
-                    hasToRemove = true;
+                    if (p2.pos.x == c.x && p2.pos.y == c.y)
+                    {
+                        xToRemove = c.x;
+                        yToRemove = c.y;
+                        hasToRemove = true;
+                    }
+                }
+                if (hasToRemove)
+                {
+                    board.pieces.RemoveAll(p2 => (int)p2.pos.x == xToRemove && (int)p2.pos.y == yToRemove);
+                    TakePieceSound();
+                }
+                else
+                {
+                    MovePieceSound();
+                }
+
+                p.pos.x = c.x;
+                p.pos.y = c.y;
+
+                bool team2 = false; ;
+
+                if (p.team)
+                {
+                    team2 = false;
+                }
+                else
+                {
+                    team2 = true;
+                }
+
+                foreach (Piece piece in game.board.pieces)
+                {
+                    if (piece.team == p.team)
+                    {
+                        if (p.type == 'p')
+                        {
+                            if (p.team)
+                            {
+                                if (p.pos.y == 1)
+                                {
+                                    Promotion(p.team, p);
+                                    return true;
+                                }
+                            }
+                            else
+                            {
+                                if (p.pos.y == 9)
+                                {
+                                    Promotion(p.team, p);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+                CheckForMateOrStale(team2, game.board.pieces, p);
+            }
+
+            return false;
+        }
+        void CheckForMateOrStale(bool team2, List<Piece> pieces, Piece p)
+        {
+            if (game.board.IsInCheck(team2, game.board.pieces)) //CHECKMATE
+            {
+                List<Coordinate> lF = new List<Coordinate>();
+
+                foreach (Piece p2 in game.board.pieces)
+                {
+
+                    if (p2.team == team2)
+                    {
+                        foreach (Coordinate c2 in game.board.FinalPossibilities(game.board.pieces, p2))
+                        {
+                            lF.Add(c2);
+                        }
+;
+                    }
+                }
+
+                if (lF.Count == 0)
+                {
+                    Checkmate(p.team);
                 }
             }
-            if (hasToRemove)
+            else
+            {//STALEMATE
+                List<Coordinate> lF = new List<Coordinate>();
+
+                foreach (Piece p2 in game.board.pieces)
+                {
+                    if (p2.team == team2)
+                    {
+                        foreach (Coordinate c2 in game.board.FinalPossibilities(game.board.pieces, p2))
+                        {
+                            lF.Add(c2);
+                        }
+;
+                    }
+                }
+
+                if (lF.Count == 0)
+                {
+                    Stalemate();
+                }
+            }
+        }
+        private void Promotion(bool team, Piece p)
+        {
+            //Removes buttons to give space for promotion
+            grid.Children.Clear();
+            grid.Children.Add(timerBlack);
+            grid.Children.Add(timerWhite);
+            game.board.cells.Clear();
+            game.board.clickableRects.Clear();
+            
+            //Creates pieces
+            //White
+            Piece wq = new Piece('q', true, new Coordinate(10, 2));
+            Piece wn = new Piece('n', true, new Coordinate(10, 3));
+            Piece wr = new Piece('r', true, new Coordinate(10, 4));
+            Piece wb = new Piece('b', true, new Coordinate(10, 5));
+            //
+            //White
+            Piece bq = new Piece('q', false, new Coordinate(10, 2));
+            Piece bn = new Piece('n', false, new Coordinate(10, 3));
+            Piece br = new Piece('r', false, new Coordinate(10, 4));
+            Piece bb = new Piece('b', false, new Coordinate(10, 5));
+            if (team)
             {
-                board.pieces.RemoveAll(p2 => (int)p2.pos.x == xToRemove && (int)p2.pos.y == yToRemove);
-                TakePieceSound();
+                promotionPieces.Add(wq);
+                promotionPieces.Add(wn);
+                promotionPieces.Add(wr);
+                promotionPieces.Add(wb);
             }
             else
             {
-                MovePieceSound();
+                promotionPieces.Add(bq);
+                promotionPieces.Add(bn);
+                promotionPieces.Add(br);
+                promotionPieces.Add(bb);
             }
-
-            p.pos.x = c.x;
-            p.pos.y = c.y;
+                        
+            DrawBoard();
+            DrawPiecesOnBoard(game.board.pieces);
+            DrawPiecesOnBoard(promotionPieces);
+            game.BluePromotionCells(promotionPieces);
+            DrawCells(game);
+            game.state = "promotion";
+        }
+        private void Stalemate()
+        {
+            StalemateSound();
+            MessageBox.Show("Stalemate, draw!");
+        }
+        private void Checkmate(bool winner)
+        {
+            game.running = false;
+            if (winner) //white
+            {
+                CheckmateSound();
+                MessageBox.Show("Checkmate, white wins!");                
+            }
+            else
+            {
+                CheckmateSound();
+                MessageBox.Show("Checkmate, black wins!");                
+            }
+        }
+        private void StalemateSound()
+        {
+            SoundPlayer audio = new SoundPlayer(Properties.Resources.stalemate);
+            audio.Play();
         }
         private void TakePieceSound()
         {
             SoundPlayer audio = new SoundPlayer(Properties.Resources.piece_fall); 
+            audio.Play();
+        }
+        private void CheckmateSound()
+        {
+            SoundPlayer audio = new SoundPlayer(Properties.Resources.checkmate);
             audio.Play();
         }
         private void MovePieceSound()
@@ -582,9 +787,14 @@ namespace Chess
         void ReDraw()
         {
             grid.Children.Clear();
+            grid.Children.Add(timerBlack);
+            grid.Children.Add(timerWhite);
+            grid.Children.Add(drawBtn);
+            grid.Children.Add(resignBtn);
             DrawBoard();
             DrawPiecesOnBoard(game.board.pieces);
             DrawCells(game);
         }
+
     }
 }

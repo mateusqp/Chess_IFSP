@@ -61,6 +61,15 @@ namespace Chess.Properties {
         }
         
         /// <summary>
+        ///   Consulta um recurso localizado do tipo System.IO.UnmanagedMemoryStream semelhante a System.IO.MemoryStream.
+        /// </summary>
+        public static System.IO.UnmanagedMemoryStream checkmate {
+            get {
+                return ResourceManager.GetStream("checkmate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Consulta um recurso localizado do tipo System.Byte[].
         /// </summary>
         public static byte[] Chess_bdt60 {
@@ -195,6 +204,15 @@ namespace Chess.Properties {
         public static System.IO.UnmanagedMemoryStream piece_slide {
             get {
                 return ResourceManager.GetStream("piece_slide", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.IO.UnmanagedMemoryStream semelhante a System.IO.MemoryStream.
+        /// </summary>
+        public static System.IO.UnmanagedMemoryStream stalemate {
+            get {
+                return ResourceManager.GetStream("stalemate", resourceCulture);
             }
         }
     }

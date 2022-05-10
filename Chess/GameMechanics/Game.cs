@@ -59,6 +59,15 @@ namespace Chess.GameMechanics
             board.cells.Add(new Cell(piece.pos.x, piece.pos.y, "Blue"));
         }
         // ------------------------------------------------------------//
+        // -- Self-Coordinate method creates a blue cell for cancelling movement --//
+        public void BluePromotionCells(List<Piece> ps)
+        {
+            foreach (Piece piece in ps)
+            {
+                board.cells.Add(new Cell(piece.pos.x, piece.pos.y, "BluePromotion"));
+            }
+        }
+        // ------------------------------------------------------------//
         #endregion
     }
 }
