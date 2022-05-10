@@ -26,6 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="DeepCloner" Version="0.10.4" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="PiecesPng\Chess_bdt60.png" />
     <Resource Include="PiecesPng\Chess_blt60.png" />
     <Resource Include="PiecesPng\Chess_kdt60.png" />

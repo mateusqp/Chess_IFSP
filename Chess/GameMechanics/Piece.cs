@@ -14,6 +14,7 @@ namespace Chess.GameMechanics
         public bool possiblePassant; //false = impossible ; true = possible
         public bool hasMoved; //For castling
         public bool exists;
+        public bool isClicked;
 
         public Piece(char type, bool team, Coordinate pos)
         {
@@ -23,6 +24,10 @@ namespace Chess.GameMechanics
             possiblePassant = false;
             hasMoved = false;
             exists = true;
+            isClicked = false;
         }
+        
+        public Piece()
+        { }
     }
 }

@@ -1,15 +1,19 @@
-﻿using System;
+﻿using Force.DeepCloner;
+using System;
 using System.Collections.Generic;
+
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Shapes;
 
 namespace Chess.GameMechanics
 {
     public class Board
     {
         public List<Piece> pieces = new();
-
+        public List<Cell> cells = new List<Cell>();
+        public List<Rectangle> clickableRects = new List<Rectangle>();
         public Board(bool team1) //Standard Board
         {
             if(team1) //Case player 1 is playing white
@@ -205,42 +209,44 @@ namespace Chess.GameMechanics
             return c;
         }
 
-        public static List<Coordinate> MovementPossibilities(Piece p, List<Piece> pieces)
+        public List<Coordinate> MovementPossibilities(Piece p, List<Piece> pieces)
         {
             List<Coordinate> cF = new(); //Final list
 
             foreach(Coordinate c in PieceMovementVector(p))
             {
                 Coordinate newCoord = new();
-                newCoord = SumCoordinate(p.pos, c);
+                
                 for(int i = 1; i < 8; i++)
                 {
-                    if (p.type == 'p' && i > 1)
-                        break;
-                    if (p.type == 'n' && i > 1)
-                        break;
-                    if (p.type == 'k' && i > 1)
-                        break;
 
-                    newCoord = MultiplyCoordinate(newCoord, i);
+                    newCoord = SumCoordinate(p.pos, MultiplyCoordinate(c, i));
 
-                    if (newCoord.x > 1 && newCoord.x < 9 && newCoord.y > 1 && newCoord.y < 9)
+
+                    if (p.type == 'p')
+                        break;
+                    if (p.type == 'n')
+                        break;
+                    if (p.type == 'k')
+                        break;                    
+
+                    if (newCoord.x > 0 && newCoord.x < 9 && newCoord.y > 0 && newCoord.y < 9 && p.type != 'p' && p.type != 'n' && p.type != 'k')
                     {
                         foreach(Piece p2 in pieces)
                         {
-                            if(p.team == p2.team && newCoord == p2.pos)
+                            if(p.team == p2.team && newCoord.x == p2.pos.x && newCoord.y == p2.pos.y)
                             {
                                 i = 9;
                                 break;
                             }
-                            if (p.team != p2.team && newCoord == p2.pos)
+                            if (p.team != p2.team && newCoord.x == p2.pos.x && newCoord.y == p2.pos.y)
                             {
                                 cF.Add(newCoord);
                                 i = 9;
                                 break;
                             }
                         }
-                        if(i < 9)
+                        if (i < 9)
                         {
                             cF.Add(newCoord);
                         }
@@ -250,7 +256,9 @@ namespace Chess.GameMechanics
 
                 bool possible;
 
-                if (newCoord.x > 1 && newCoord.x < 9 && newCoord.y > 1 && newCoord.y < 9)
+                newCoord = SumCoordinate(p.pos, c);
+
+                if (newCoord.x > 0 && newCoord.x < 9 && newCoord.y > 0 && newCoord.y < 9)
                 {
                     switch (p.type)
                     {
@@ -258,7 +266,7 @@ namespace Chess.GameMechanics
                             possible = true;
                             foreach (Piece p2 in pieces)
                             {
-                                if (c.y == 2 || c.y == -2 && p.hasMoved)
+                                if (Math.Abs(c.y) == 2 && p.hasMoved)
                                 {
                                     possible = false;
                                     break;
@@ -266,12 +274,12 @@ namespace Chess.GameMechanics
 
                                 if (c.y == 2)
                                 {
-                                    if (p2.pos == newCoord)
+                                    if (p2.pos.x == newCoord.x && p2.pos.y == newCoord.y)
                                     {
                                         possible = false;
                                         break;
                                     }
-                                    if (p2.pos == new Coordinate(newCoord.x, newCoord.y - 1))
+                                    if (p2.pos.x == newCoord.x && p2.pos.y == newCoord.y - 1)
                                     {
                                         possible = false;
                                         break;
@@ -280,12 +288,12 @@ namespace Chess.GameMechanics
 
                                 if (c.y == -2)
                                 {
-                                    if (p2.pos == newCoord)
+                                    if (p2.pos.x == newCoord.x && p2.pos.y == newCoord.y)
                                     {
                                         possible = false;
                                         break;
                                     }
-                                    if (p2.pos == new Coordinate(newCoord.x, newCoord.y + 1))
+                                    if (p2.pos.x == newCoord.x && p2.pos.y == newCoord.y + 1)
                                     {
                                         possible = false;
                                         break;
@@ -295,14 +303,53 @@ namespace Chess.GameMechanics
 
                             if (c.y == 1 || c.y == -1)
                             {
-                                foreach (Piece p2 in pieces)
+                                if (c.x == 0)
                                 {
-                                    if (p2.pos == newCoord)
+                                    foreach (Piece p2 in pieces)
                                     {
-                                        possible = false;
-                                        break;
+                                        if (p2.pos.x == newCoord.x && p2.pos.y == newCoord.y)
+                                        {
+                                            possible = false;
+                                            break;
+                                        }
                                     }
                                 }
+                            }
+                            
+                            if (c.y == 1 || c.y == -1)
+                            {
+                                if (c.x != 0)
+                                {
+                                    possible = false;
+                                    foreach (Piece p2 in pieces)
+                                    {
+                                        if (p2.pos.x == newCoord.x && p2.pos.y == newCoord.y && p.team != p2.team)
+                                        {
+                                            possible = true;
+                                            break;
+                                        }
+                                    }
+                                    foreach (Piece p2 in pieces)
+                                    {
+                                        if (c.x == 1)
+                                        {
+                                            if (p.pos.y == p2.pos.y && p.pos.x == p2.pos.x - 1 && p2.possiblePassant)
+                                            {
+                                                possible = true;
+                                                break;
+                                            }
+                                        }
+                                        if (c.x == -1)
+                                        {
+                                            if (p.pos.y == p2.pos.y && p.pos.x == p2.pos.x + 1 && p2.possiblePassant)
+                                            {
+                                                possible = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                
                             }
                             if (possible)
                             {
@@ -316,7 +363,7 @@ namespace Chess.GameMechanics
 
                             foreach (Piece p2 in pieces)
                             {
-                                if (p2.pos == newCoord && p2.team == p.team)
+                                if (p2.pos.x == newCoord.x && p2.pos.y == newCoord.y && p2.team == p.team)
                                 {
                                     possible = false;
                                 }
@@ -333,7 +380,7 @@ namespace Chess.GameMechanics
 
                             foreach (Piece p2 in pieces)
                             {
-                                if (p2.pos == newCoord && p2.team == p.team)
+                                if (p2.pos.x == newCoord.x && p2.pos.y == newCoord.y && p2.team == p.team)
                                 {
                                     possible = false;
                                 }
@@ -346,10 +393,88 @@ namespace Chess.GameMechanics
                     }
                 }
                 
-            }            
+            }
             return cF;
         }
+        public bool IsInCheck(bool team, List<Piece> pieces)
+        {
+            bool isInCheck = false;
 
+            Piece king = new Piece();
+            foreach (Piece p in pieces)
+            {
+                if (p.team == team && p.type == 'k')
+                {
+                    king = p;
+                }
+            }
+            foreach (Piece p in pieces)
+            {
+                if (p.team != team)
+                {
+                    foreach (Coordinate c in MovementPossibilities(p, pieces))
+                    {
+                        if (c.x == king.pos.x && c.y == king.pos.y)
+                        {
+                            if (p.type == 'p')
+                            {
+                                if(c.x != 0)
+                                return true;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return isInCheck;
+        }
+        public List<Coordinate> FinalPossibilities(List<Piece> pieces, Piece p)
+        {
+            Piece pAux = p.DeepClone();            
+            Piece enemyRemoved = new Piece();
+            List<Coordinate> ps = MovementPossibilities(p, pieces);
+            List<Coordinate> psF = new List<Coordinate>();
+            
+            foreach (Coordinate c in ps)
+            {
+                bool removed = false;
+                foreach (Piece pp in pieces)
+                {
+                    if (pp.pos.x == c.x && pp.pos.y == c.y)
+                    {
+                        enemyRemoved = pieces.Find(p2 => p2.pos.x == c.x && p2.pos.y == c.y).DeepClone();
+                        pieces.RemoveAll(p2 => p2.pos.x == c.x && p2.pos.y == c.y);
+                        removed = true;
+                        break;
+                    }
+                }
+                
+
+                p.pos.x = c.x;
+                p.pos.y = c.y;
+                
+                if (IsInCheck(p.team, pieces))
+                {
+                    
+                }
+                else
+                {
+                    psF.Add(c);
+                }
+                p.pos.x = pAux.pos.x;
+                p.pos.y = pAux.pos.y;
+                if (removed)
+                {
+                    pieces.Add(enemyRemoved);
+                }
+            }
+            return psF;
+        }
+        
         public static Coordinate SumCoordinate(Coordinate c1, Coordinate c2)
         {
             return new Coordinate(c1.x + c2.x, c1.y + c2.y);
@@ -358,5 +483,107 @@ namespace Chess.GameMechanics
         {
             return new Coordinate(c1.x * i, c1.y *i);
         }
+        public static Coordinate InvertCoordinate(Coordinate c)
+        {
+            Coordinate cF = new();
+
+            switch (c.x)
+            {
+                case 8:
+                    cF.x = 1;
+                    break;
+                case 7:
+                    cF.x = 2;
+                    break;
+                case 6:
+                    cF.x = 3;
+                    break;
+                case 5:
+                    cF.x = 4;
+                    break;
+                case 4:
+                    cF.x = 5;
+                    break;
+                case 3:
+                    cF.x = 6;
+                    break;
+                case 2:
+                    cF.x = 7;
+                    break;
+                case 1:
+                    cF.x = 8;
+                    break;
+            }
+
+            switch (c.y)
+            {
+                case 8:
+                    cF.y = 1;
+                    break;
+                case 7:
+                    cF.y = 2;
+                    break;
+                case 6:
+                    cF.y = 3;
+                    break;
+                case 5:
+                    cF.y = 4;
+                    break;
+                case 4:
+                    cF.y = 5;
+                    break;
+                case 3:
+                    cF.y = 6;
+                    break;
+                case 2:
+                    cF.y = 7;
+                    break;
+                case 1:
+                    cF.y = 8;
+                    break;
+            }
+
+            return cF;
+        }
+        public static bool IsCoordinateEqual(Coordinate c1, Coordinate c2)
+        {
+            if (c1.x == c2.x && c1.y == c2.y)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public Coordinate PieceCoord(Piece piece)
+        {
+            return new Coordinate(piece.pos.x, piece.pos.y);
+        }
+        public bool TeamOfPieceInCoord(Coordinate c1, List<Piece> pieces)
+        {
+            foreach (Piece piece in pieces)
+            {
+                if (c1.x == piece.pos.x && c1.y == piece.pos.y)
+                {
+                    return piece.team;
+                }
+            }
+            return false;
+        }
+        public Piece PieceFromCoordinate(Coordinate c)
+        {
+            foreach (Piece piece in pieces)
+            {
+                if (c.x == piece.pos.x && c.y == piece.pos.y)
+                {
+                    return piece;
+                }
+            }
+            /// This below should never happen, LUL/
+            return new Piece();
+        }
+
+        
     }
 }

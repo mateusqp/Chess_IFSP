@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Chess.GameMechanics;
 using Chess.Properties;
+using System.Media;
 
 
 
@@ -25,25 +26,27 @@ namespace Chess
     /// </summary>
     public partial class GameWindow : Window
     {
-        Resources resources;
+        //- Receive these from MainWindow
+        static Timer timer = new Timer();
+        static bool player1Color = true;
+        static Player p1 = new();
+        static Player p2 = new();
+        //-
+        Game game = new Game(timer, player1Color, p1, p2);
 
+
+        string gameState = "selectPiece";
         public GameWindow()
         {
             InitializeComponent();
             DrawBoard();
 
-            //- Receive these from MainWindow
-            Timer timer = new Timer();
-            bool player1Color = true;
-            Player p1 = new();
-            Player p2 = new();
-            //-
-
-            Game game = new Game(timer, player1Color, p1, p2);
 
             DrawPiecesOnBoard(game.board.pieces);
-            
+            game.InvisibleCells();
+            DrawCells(game);            
         }
+
         
         private void Offer_Draw(object sender, RoutedEventArgs e)
         {
@@ -54,7 +57,7 @@ namespace Chess
         {
 
         }
-        
+        #region BoardDrawing
         public void DrawBoard()
         {
 
@@ -106,7 +109,6 @@ namespace Chess
                 }
             }
         } //working
-
         public void DrawPiecesOnBoard(List<Piece> pieces)
         {
 
@@ -289,6 +291,7 @@ namespace Chess
 
 
         }
+        #endregion
         private static BitmapImage LoadImage(byte[] imageData) //Thanks to https://stackoverflow.com/users/76051/random-dev
         {
             if (imageData == null || imageData.Length == 0) return null;
@@ -306,7 +309,282 @@ namespace Chess
             image.Freeze();
             return image;
         }
+        public static Coordinate InvertCoordinate(Coordinate c)
+        {
+            Coordinate cF = new();
+
+            switch(c.x)
+            {
+                case 8:
+                    cF.x = 1;
+                    break;
+                case 7:
+                    cF.x = 2;
+                    break;
+                case 6:
+                    cF.x = 3;
+                    break;
+                case 5:
+                    cF.x = 4;
+                    break;
+                case 4:
+                    cF.x = 5;
+                    break;
+                case 3:
+                    cF.x = 6;
+                    break;
+                case 2:
+                    cF.x = 7;
+                    break;
+                case 1:
+                    cF.x = 8;
+                    break;
+            }
+
+            switch (c.y)
+            {
+                case 8:
+                    cF.y = 1;
+                    break;
+                case 7:
+                    cF.y = 2;
+                    break;
+                case 6:
+                    cF.y = 3;
+                    break;
+                case 5:
+                    cF.y = 4;
+                    break;
+                case 4:
+                    cF.y = 5;
+                    break;
+                case 3:
+                    cF.y = 6;
+                    break;
+                case 2:
+                    cF.y = 7;
+                    break;
+                case 1:
+                    cF.y = 8;
+                    break;
+            }
+
+            return cF;
+        }
+        public void DrawCells(Game game) // -- NOT THE BOARD CELLS, Cells for CLICKABLE rectangles, Also adds the Rectangles///
+        {
+            game.board.clickableRects.Clear();
+
+            foreach (Cell cell in game.board.cells)
+            {
+                Rectangle r = new Rectangle();
+                SolidColorBrush brush = new SolidColorBrush();
+                Grid.SetColumn(r, cell.x - 1);
+                Grid.SetRow(r, cell.y - 1);
 
 
+                if (cell.color == "Invisible")
+                {
+                    brush.Color = Colors.White;
+                    r.Fill = brush;
+                    r.Opacity = 0;
+
+                }
+                if (cell.color == "Red")
+                {
+                    brush.Color = Colors.Red;
+                    r.Fill = brush;
+                    r.Opacity = 0.15;
+
+                }
+                if (cell.color == "Blue")
+                {
+                    brush.Color = Colors.LightBlue;
+                    r.Fill = brush;
+                    r.Opacity = 0.2;
+
+                }
+                if (cell.color == "BluePromotion")
+                {
+                    brush.Color = Colors.LightBlue;
+                    r.Fill = brush;
+                    r.Opacity = 0.2;
+
+                }
+
+                grid.Children.Add(r);
+
+                r.MouseDown += new MouseButtonEventHandler(ClickOnPiece);
+
+                game.board.clickableRects.Add(r);
+            }
+        }
+
+        private void ClickOnPiece(object sender, MouseButtonEventArgs e)
+        {
+            //Detects Piece and Coordinate
+            Coordinate clickedCoordinate = new Coordinate();
+            Piece clickedPiece = new Piece();
+            string cellColor = "";
+
+            for (int i = 0; i < game.board.clickableRects.Count; i++)
+            {
+                if (sender.Equals(game.board.clickableRects[i]))
+                {
+                    //Gets the clicked piece
+                    clickedCoordinate = new Coordinate((int)game.board.cells[i].x, (int)game.board.cells[i].y);                     
+                }
+            }
+            foreach(Piece p in game.board.pieces)
+            {
+                if (p.pos.x == clickedCoordinate.x && p.pos.y == clickedCoordinate.y)
+                {
+                    clickedPiece = p;
+                }
+            }
+
+
+
+            foreach (Cell c in game.board.cells)
+            {
+                if (clickedCoordinate.x == c.x && clickedCoordinate.y == c.y)
+                {
+                    cellColor = c.color;
+                }
+            }
+
+
+
+            if (game.state == "selectPiece" && cellColor == "Invisible")
+            {
+                foreach(Piece p in game.board.pieces)
+                {
+                    if (p.pos.x == clickedCoordinate.x && p.pos.y == clickedCoordinate.y)
+                    {
+                        p.isClicked = true;
+                    }
+                }
+                game.state = "selectCoordinate";
+                game.board.cells.Clear();
+                game.board.clickableRects.Clear();
+                if (clickedPiece.type == 'k')
+                {
+                    game.RedCells(game.board.FinalPossibilities(game.board.pieces, clickedPiece));
+                    
+                }
+                else
+                {
+                    game.RedCells(game.board.FinalPossibilities(game.board.pieces, clickedPiece));
+                }
+                
+                game.BlueCells(clickedPiece);
+
+                ReDraw();
+            }
+
+            if (game.state == "selectCoordinate" && cellColor == "Blue")
+            {
+                foreach (Piece p in game.board.pieces)
+                {
+                    p.isClicked = false;
+                }
+                game.state = "selectPiece";
+                game.board.cells.Clear();
+                game.board.clickableRects.Clear();
+                game.InvisibleCells();
+
+                ReDraw();
+            }
+
+            if (game.state == "selectCoordinate" && cellColor == "Red")
+            {                
+                Piece p = new Piece();
+                foreach (Piece piece in game.board.pieces)
+                {
+                    if (piece.isClicked)
+                    {
+                        p = piece;
+                    }
+                }
+                p.isClicked = false;
+                p.hasMoved = true;
+                if(game.turn)
+                {
+                    game.turn = false;
+                }
+                else
+                {
+                    game.turn = true;
+                }
+                MovePiece(p, clickedCoordinate, game.board);
+                game.state = "selectPiece";
+                game.board.cells.Clear();
+                game.board.clickableRects.Clear();
+                game.InvisibleCells();
+
+                ReDraw();
+            }
+            
+        }
+        void MovePiece(Piece p, Coordinate c, Board board)
+        {
+            int xToRemove = -1;
+            int yToRemove = -1;
+            bool hasToRemove = false;
+            foreach (Piece piece in board.pieces)
+            {
+                if (p.team != piece.team)
+                {
+                    piece.possiblePassant = false;
+                }
+            }
+            if (p.type == 'p')
+            {
+                if (Math.Abs(p.pos.y - c.y) == 2)
+                {
+                    p.possiblePassant = true;
+                }
+            }
+            
+
+            foreach (Piece p2 in board.pieces)
+            {
+                if (p2.pos.x == c.x && p2.pos.y == c.y)
+                {
+                    xToRemove = c.x;
+                    yToRemove = c.y;
+                    hasToRemove = true;
+                }
+            }
+            if (hasToRemove)
+            {
+                board.pieces.RemoveAll(p2 => (int)p2.pos.x == xToRemove && (int)p2.pos.y == yToRemove);
+                TakePieceSound();
+            }
+            else
+            {
+                MovePieceSound();
+            }
+
+            p.pos.x = c.x;
+            p.pos.y = c.y;
+        }
+        private void TakePieceSound()
+        {
+            SoundPlayer audio = new SoundPlayer(Properties.Resources.piece_fall); 
+            audio.Play();
+        }
+        private void MovePieceSound()
+        {
+            SoundPlayer audio = new SoundPlayer(Properties.Resources.piece_slide);
+            audio.Play();
+        }
+        void ReDraw()
+        {
+            grid.Children.Clear();
+            DrawBoard();
+            DrawPiecesOnBoard(game.board.pieces);
+            DrawCells(game);
+        }
     }
 }

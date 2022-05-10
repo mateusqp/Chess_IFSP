@@ -179,5 +179,23 @@ namespace Chess.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.IO.UnmanagedMemoryStream semelhante a System.IO.MemoryStream.
+        /// </summary>
+        public static System.IO.UnmanagedMemoryStream piece_fall {
+            get {
+                return ResourceManager.GetStream("piece_fall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.IO.UnmanagedMemoryStream semelhante a System.IO.MemoryStream.
+        /// </summary>
+        public static System.IO.UnmanagedMemoryStream piece_slide {
+            get {
+                return ResourceManager.GetStream("piece_slide", resourceCulture);
+            }
+        }
     }
 }
