@@ -31,11 +31,11 @@ namespace Chess
         static Player p2 = new();
         bool promotion = false;
         //-
-        Game game = new Game(timer, player1Color, p1, p2);
-        
+        public Game game = new Game(timer, true, p1, p2);
 
-        string gameState = "selectPiece";
+
         List<Piece> promotionPieces = new List<Piece>();
+
         public GameWindow()
         {
             InitializeComponent();
@@ -47,7 +47,7 @@ namespace Chess
             DrawCells(game);
         }
 
-        
+
         private void Offer_Draw(object sender, RoutedEventArgs e)
         {
 
@@ -67,7 +67,7 @@ namespace Chess
                 for (int j = 0; j < 4; j++)
                 {
                     Rectangle retang = new Rectangle();
-                    retang.Fill = new SolidColorBrush(Color.FromRgb(200, 252, 177));
+                    retang.Fill = new SolidColorBrush(Color.FromRgb(190, 219, 145));
                     retang.Stroke = new SolidColorBrush(Color.FromRgb(0, 0, 0));
                     retang.StrokeThickness = 2;
 
@@ -91,7 +91,7 @@ namespace Chess
                 for (int j = 0; j < 4; j++)
                 {
                     Rectangle retang = new Rectangle();
-                    retang.Fill = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                    retang.Fill = new SolidColorBrush(Color.FromRgb(246, 252, 237));
                     retang.Stroke = new SolidColorBrush(Color.FromRgb(0, 0, 0));
                     retang.StrokeThickness = 2;
 
@@ -122,11 +122,22 @@ namespace Chess
             {
                 if (piece.type == 'r' && piece.team == true && piece.exists == true)
                 {
-                    Image wr = new Image();                    
-                    wr.Source = wri;                    
+                    Image wr = new Image();
+                    wr.Source = wri;
                     grid.Children.Add(wr);
-                    Grid.SetRow(wr, piece.pos.y - 1);
-                    Grid.SetColumn(wr, piece.pos.x - 1);
+
+                    Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    if (!game.player1Color)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    }
+
+                    Grid.SetRow(wr, invertCoord.y - 1);
+                    Grid.SetColumn(wr, invertCoord.x - 1);
 
 
 
@@ -137,8 +148,17 @@ namespace Chess
                     Image br = new Image();
                     br.Source = bri;
                     grid.Children.Add(br);
-                    Grid.SetRow(br, piece.pos.y - 1);
-                    Grid.SetColumn(br, piece.pos.x - 1);
+                    Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    if (!game.player1Color)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    }
+                    Grid.SetRow(br, invertCoord.y - 1);
+                    Grid.SetColumn(br, invertCoord.x - 1);
                 }
             }
 
@@ -156,8 +176,18 @@ namespace Chess
                     Image wn = new Image();
                     wn.Source = wni;
                     grid.Children.Add(wn);
-                    Grid.SetRow(wn, piece.pos.y - 1);
-                    Grid.SetColumn(wn, piece.pos.x - 1);
+
+                    Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    if (!game.player1Color)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    }
+                    Grid.SetRow(wn, invertCoord.y - 1);
+                    Grid.SetColumn(wn, invertCoord.x - 1);
 
                 }
 
@@ -166,8 +196,18 @@ namespace Chess
                     Image bn = new Image();
                     bn.Source = bni;
                     grid.Children.Add(bn);
-                    Grid.SetRow(bn, piece.pos.y - 1);
-                    Grid.SetColumn(bn, piece.pos.x - 1);
+
+                    Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    if (!game.player1Color)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    }
+                    Grid.SetRow(bn, invertCoord.y - 1);
+                    Grid.SetColumn(bn, invertCoord.x - 1);
                 }
             }
 
@@ -185,8 +225,18 @@ namespace Chess
                     Image wb = new Image();
                     wb.Source = wbi;
                     grid.Children.Add(wb);
-                    Grid.SetRow(wb, piece.pos.y - 1);
-                    Grid.SetColumn(wb, piece.pos.x - 1);
+
+                    Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    if (!game.player1Color)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    }
+                    Grid.SetRow(wb, invertCoord.y - 1);
+                    Grid.SetColumn(wb, invertCoord.x - 1);
 
                 }
 
@@ -195,8 +245,18 @@ namespace Chess
                     Image bb = new Image();
                     bb.Source = bbi;
                     grid.Children.Add(bb);
-                    Grid.SetRow(bb, piece.pos.y - 1);
-                    Grid.SetColumn(bb, piece.pos.x - 1);
+
+                    Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    if (!game.player1Color)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    }
+                    Grid.SetRow(bb, invertCoord.y - 1);
+                    Grid.SetColumn(bb, invertCoord.x - 1);
                 }
             }
 
@@ -215,8 +275,18 @@ namespace Chess
                     Image wq = new Image();
                     wq.Source = wqi;
                     grid.Children.Add(wq);
-                    Grid.SetRow(wq, piece.pos.y - 1);
-                    Grid.SetColumn(wq, piece.pos.x - 1);
+
+                    Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    if (!game.player1Color)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    }
+                    Grid.SetRow(wq, invertCoord.y - 1);
+                    Grid.SetColumn(wq, invertCoord.x - 1);
 
                 }
 
@@ -225,8 +295,18 @@ namespace Chess
                     Image bq = new Image();
                     bq.Source = bqi;
                     grid.Children.Add(bq);
-                    Grid.SetRow(bq, piece.pos.y - 1);
-                    Grid.SetColumn(bq, piece.pos.x - 1);
+
+                    Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    if (!game.player1Color)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    }
+                    Grid.SetRow(bq, invertCoord.y - 1);
+                    Grid.SetColumn(bq, invertCoord.x - 1);
                 }
             }
 
@@ -245,8 +325,18 @@ namespace Chess
                     Image wk = new Image();
                     wk.Source = wki;
                     grid.Children.Add(wk);
-                    Grid.SetRow(wk, piece.pos.y - 1);
-                    Grid.SetColumn(wk, piece.pos.x - 1);
+
+                    Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    if (!game.player1Color)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    }
+                    Grid.SetRow(wk, invertCoord.y - 1);
+                    Grid.SetColumn(wk, invertCoord.x - 1);
 
                 }
 
@@ -255,8 +345,18 @@ namespace Chess
                     Image bk = new Image();
                     bk.Source = bki;
                     grid.Children.Add(bk);
-                    Grid.SetRow(bk, piece.pos.y - 1);
-                    Grid.SetColumn(bk, piece.pos.x - 1);
+
+                    Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    if (!game.player1Color)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    }
+                    Grid.SetRow(bk, invertCoord.y - 1);
+                    Grid.SetColumn(bk, invertCoord.x - 1);
                 }
             }
 
@@ -274,8 +374,18 @@ namespace Chess
                     Image wp = new Image();
                     wp.Source = wpi;
                     grid.Children.Add(wp);
-                    Grid.SetRow(wp, piece.pos.y - 1);
-                    Grid.SetColumn(wp, piece.pos.x - 1);
+
+                    Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    if (!game.player1Color)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    }
+                    Grid.SetRow(wp, invertCoord.y - 1);
+                    Grid.SetColumn(wp, invertCoord.x - 1);
 
                 }
 
@@ -284,8 +394,18 @@ namespace Chess
                     Image bp = new Image();
                     bp.Source = bpi;
                     grid.Children.Add(bp);
-                    Grid.SetRow(bp, piece.pos.y - 1);
-                    Grid.SetColumn(bp, piece.pos.x - 1);
+
+                    Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    if (!game.player1Color)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
+                    }
+                    Grid.SetRow(bp, invertCoord.y - 1);
+                    Grid.SetColumn(bp, invertCoord.x - 1);
                 }
             }
 
@@ -311,10 +431,13 @@ namespace Chess
         }
         public static Coordinate InvertCoordinate(Coordinate c)
         {
-            Coordinate cF = new();
+            Coordinate cF = new Coordinate();
 
-            switch(c.x)
+            switch (c.x)
             {
+                case 9:
+                    cF.x = 0;
+                    break;
                 case 8:
                     cF.x = 1;
                     break;
@@ -339,10 +462,16 @@ namespace Chess
                 case 1:
                     cF.x = 8;
                     break;
+                case 0:
+                    cF.x = 9;
+                    break;
             }
 
             switch (c.y)
             {
+                case 9:
+                    cF.y = 0;
+                    break;
                 case 8:
                     cF.y = 1;
                     break;
@@ -367,6 +496,9 @@ namespace Chess
                 case 1:
                     cF.y = 8;
                     break;
+                case 0:
+                    cF.y = 9;
+                    break;
             }
 
             return cF;
@@ -379,8 +511,17 @@ namespace Chess
             {
                 Rectangle r = new Rectangle();
                 SolidColorBrush brush = new SolidColorBrush();
-                Grid.SetColumn(r, cell.x - 1);
-                Grid.SetRow(r, cell.y - 1);
+                Coordinate invertCoord = new Coordinate(cell.x + 1, cell.y + 1);
+                if (!game.player1Color)
+                {
+                    invertCoord = InvertCoordinate(invertCoord);
+                }
+                else
+                {
+                    invertCoord = new Coordinate(cell.x - 1, cell.y - 1);
+                }
+                Grid.SetColumn(r, invertCoord.x);
+                Grid.SetRow(r, invertCoord.y);
 
 
                 if (cell.color == "Invisible")
@@ -394,7 +535,7 @@ namespace Chess
                 {
                     brush.Color = Colors.Red;
                     r.Fill = brush;
-                    r.Opacity = 0.15;
+                    r.Opacity = 0.1;
 
                 }
                 if (cell.color == "Blue")
@@ -434,6 +575,7 @@ namespace Chess
                 {
                     //Gets the clicked piece
                     clickedCoordinate = new Coordinate((int)game.board.cells[i].x, (int)game.board.cells[i].y);
+
                 }
             }
             foreach (Piece p in game.board.pieces)
@@ -456,7 +598,6 @@ namespace Chess
 
             if (game.running && !promotion)
             {
-                
                 if (game.state == "selectPiece" && cellColor == "Invisible")
                 {
                     foreach (Piece p in game.board.pieces)
@@ -566,7 +707,7 @@ namespace Chess
                     CheckForMateOrStale(team2, game.board.pieces, clickedPiece);
                 }
             }
-            
+
         }
         bool MovePiece(Piece p, Coordinate c, Board board) //returns false if promotion
         {
@@ -710,7 +851,7 @@ namespace Chess
             grid.Children.Add(timerWhite);
             game.board.cells.Clear();
             game.board.clickableRects.Clear();
-            
+
             //Creates pieces
             //White
             Piece wq = new Piece('q', true, new Coordinate(10, 2));
@@ -737,7 +878,7 @@ namespace Chess
                 promotionPieces.Add(br);
                 promotionPieces.Add(bb);
             }
-                        
+
             DrawBoard();
             DrawPiecesOnBoard(game.board.pieces);
             DrawPiecesOnBoard(promotionPieces);
@@ -748,20 +889,26 @@ namespace Chess
         private void Stalemate()
         {
             StalemateSound();
+            grid.Children.Remove(drawBtn);
+            grid.Children.Remove(resignBtn);
             MessageBox.Show("Stalemate, draw!");
+            game.state = "over";
         }
         private void Checkmate(bool winner)
         {
+            grid.Children.Remove(drawBtn);
+            grid.Children.Remove(resignBtn);
             game.running = false;
+            game.state = "over";
             if (winner) //white
             {
                 CheckmateSound();
-                MessageBox.Show("Checkmate, white wins!");                
+                MessageBox.Show("Checkmate, white wins!");
             }
             else
             {
                 CheckmateSound();
-                MessageBox.Show("Checkmate, black wins!");                
+                MessageBox.Show("Checkmate, black wins!");
             }
         }
         private void StalemateSound()
@@ -771,7 +918,7 @@ namespace Chess
         }
         private void TakePieceSound()
         {
-            SoundPlayer audio = new SoundPlayer(Properties.Resources.piece_fall); 
+            SoundPlayer audio = new SoundPlayer(Properties.Resources.piece_fall);
             audio.Play();
         }
         private void CheckmateSound()
@@ -787,10 +934,13 @@ namespace Chess
         void ReDraw()
         {
             grid.Children.Clear();
+            if (game.running)
+            {
+                grid.Children.Add(drawBtn);
+                grid.Children.Add(resignBtn);
+            }
             grid.Children.Add(timerBlack);
             grid.Children.Add(timerWhite);
-            grid.Children.Add(drawBtn);
-            grid.Children.Add(resignBtn);
             DrawBoard();
             DrawPiecesOnBoard(game.board.pieces);
             DrawCells(game);

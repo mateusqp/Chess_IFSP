@@ -22,6 +22,7 @@ namespace Chess.GameMechanics
         {
             this.timer = timer;
             board = new Board(player1Color);
+            this.player1Color = player1Color;
             this.player1 = player1;
             this.player2 = player2;
             turn = true;

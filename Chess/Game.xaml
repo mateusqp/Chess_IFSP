@@ -49,7 +49,7 @@
         <Label Name="timerWhite" Content="0:00" FontWeight="ExtraBlack" FontSize="30" FontFamily="Stormfaze" Grid.Column="8" Grid.Row="7" Grid.ColumnSpan="2"/>
 
         <TextBlock Name="txtBlock" FontSize="9" Text="Moves:" IsEnabled="False" Grid.Row="1"  Grid.Column="8" Grid.ColumnSpan="2" Grid.RowSpan="6" Margin="10,20,10,6"></TextBlock>
-        <Button Name="drawBtn" Content = "Offer draw"  Grid.Row="8" Grid.ColumnSpan="2" Grid.Column="5" Click="Offer_Draw" Margin="10,15,10,15"/>
-        <Button Name="resignBtn" Content = "Resign"  Grid.Row="8" Grid.ColumnSpan="2" Grid.Column="2" Click="Resign" Margin="10,15,10,15"/>
+        <Button Name="drawBtn" Content = "Offer draw"  Grid.Row="9" Grid.ColumnSpan="2" Grid.Column="5" Click="Offer_Draw" Margin="10,15,10,15"/>
+        <Button Name="resignBtn" Content = "Resign"  Grid.Row="9" Grid.ColumnSpan="2" Grid.Column="2" Click="Resign" Margin="10,15,10,15"/>
     </Grid>
 </Window>

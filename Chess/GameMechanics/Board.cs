@@ -16,7 +16,7 @@ namespace Chess.GameMechanics
         public List<Rectangle> clickableRects = new List<Rectangle>();
         public Board(bool team1) //Standard Board
         {
-            if(team1) //Case player 1 is playing white
+            if (team1 || !team1) //Doesnt matter which team is which, inverting coordinates in game.xaml.cs will do it;
             {
                 for (int y = 1; y < 9; y++) //inserting pieces
                 {
@@ -68,64 +68,6 @@ namespace Chess.GameMechanics
 
                             case 2:
                                 pieces.Add(new Piece('p', false, new Coordinate((sbyte)x, (sbyte)y)));
-                                break;
-                        }
-
-                    }
-                }
-            }
-            else //Case player 1 is playing black
-            {
-                for (int y = 1; y < 9; y++) //inserting pieces
-                {
-
-                    for (int x = 1; x < 9; x++)
-                    {
-                        char type = '0';
-                        switch (x)
-                        {
-                            case 1:
-                                type = 'r';
-                                break;
-                            case 2:
-                                type = 'n';
-                                break;
-                            case 3:
-                                type = 'b';
-                                break;
-                            case 4:
-                                type = 'k';
-                                break;
-                            case 5:
-                                type = 'q';
-                                break;
-                            case 6:
-                                type = 'n';
-                                break;
-                            case 7:
-                                type = 'r';
-                                break;
-                            case 8:
-                                type = 'r';
-                                break;
-
-                        }
-                        switch (y)
-                        {
-                            case 8:
-                                pieces.Add(new Piece(type, false, new Coordinate((sbyte)x, (sbyte)y)));
-                                break;
-
-                            case 1:
-                                pieces.Add(new Piece(type, true, new Coordinate((sbyte)x, (sbyte)y)));
-                                break;
-
-                            case 7:
-                                pieces.Add(new Piece('p', false, new Coordinate((sbyte)x, (sbyte)y)));
-                                break;
-
-                            case 2:
-                                pieces.Add(new Piece('p', true, new Coordinate((sbyte)x, (sbyte)y)));
                                 break;
                         }
 
@@ -137,7 +79,7 @@ namespace Chess.GameMechanics
         public static List<Coordinate> PieceMovementVector(Piece p)
         {
             List<Coordinate> c = new();
-            switch(p.type)
+            switch (p.type)
             {
                 case 'r':
                     c.Add(new Coordinate(1, 0));
@@ -188,14 +130,14 @@ namespace Chess.GameMechanics
                     break;
 
                 case 'p':
-                    if(p.team) //White
+                    if (p.team) //White
                     {
                         c.Add(new Coordinate(0, -1));
                         c.Add(new Coordinate(0, -2));
                         c.Add(new Coordinate(1, -1));
                         c.Add(new Coordinate(-1, -1));
                     }
-                    
+
                     else
                     {
                         c.Add(new Coordinate(0, 1));
@@ -208,16 +150,15 @@ namespace Chess.GameMechanics
             }
             return c;
         }
-
         public List<Coordinate> MovementPossibilities(Piece p, List<Piece> pieces)
         {
             List<Coordinate> cF = new(); //Final list
 
-            foreach(Coordinate c in PieceMovementVector(p))
+            foreach (Coordinate c in PieceMovementVector(p))
             {
                 Coordinate newCoord = new();
-                
-                for(int i = 1; i < 8; i++)
+
+                for (int i = 1; i < 8; i++)
                 {
 
                     newCoord = SumCoordinate(p.pos, MultiplyCoordinate(c, i));
@@ -228,13 +169,13 @@ namespace Chess.GameMechanics
                     if (p.type == 'n')
                         break;
                     if (p.type == 'k')
-                        break;                    
+                        break;
 
                     if (newCoord.x > 0 && newCoord.x < 9 && newCoord.y > 0 && newCoord.y < 9 && p.type != 'p' && p.type != 'n' && p.type != 'k')
                     {
-                        foreach(Piece p2 in pieces)
+                        foreach (Piece p2 in pieces)
                         {
-                            if(p.team == p2.team && newCoord.x == p2.pos.x && newCoord.y == p2.pos.y)
+                            if (p.team == p2.team && newCoord.x == p2.pos.x && newCoord.y == p2.pos.y)
                             {
                                 i = 9;
                                 break;
@@ -315,7 +256,7 @@ namespace Chess.GameMechanics
                                     }
                                 }
                             }
-                            
+
                             if (c.y == 1 || c.y == -1)
                             {
                                 if (c.x != 0)
@@ -349,7 +290,7 @@ namespace Chess.GameMechanics
                                         }
                                     }
                                 }
-                                
+
                             }
                             if (possible)
                             {
@@ -392,7 +333,7 @@ namespace Chess.GameMechanics
                             break;
                     }
                 }
-                
+
             }
             return cF;
         }
@@ -418,8 +359,8 @@ namespace Chess.GameMechanics
                         {
                             if (p.type == 'p')
                             {
-                                if(c.x != 0)
-                                return true;
+                                if (c.x != 0)
+                                    return true;
                             }
                             else
                             {
@@ -434,7 +375,7 @@ namespace Chess.GameMechanics
         }
         public List<Coordinate> FinalPossibilities(List<Piece> pieces, Piece p)
         {
-            
+
             Piece pAux = p.DeepClone();
             Piece enemyRemoved = new Piece();
             List<Coordinate> ps = MovementPossibilities(p, pieces);
@@ -458,14 +399,14 @@ namespace Chess.GameMechanics
                         break;
                     }
                 }
-                
+
 
                 p.pos.x = c.x;
                 p.pos.y = c.y;
-                
+
                 if (IsInCheck(p.team, pieces))
                 {
-                    
+
                 }
                 else
                 {
@@ -474,24 +415,60 @@ namespace Chess.GameMechanics
                 p.pos.x = pAux.pos.x;
                 p.pos.y = pAux.pos.y;
 
-                if(removed)
+                if (removed)
                 {
                     takenPiece.pos.x = enemyRemoved.pos.x;
                     takenPiece.pos.y = enemyRemoved.pos.y;
                 }
-                
+
             }
-            
+
             return psF;
         }
-        
+        public List<Coordinate> IncludeCastling(List<Piece> pieces, Piece king)
+        {
+            List<Piece> piecesAux = new List<Piece>();
+            Piece kingAux = king.DeepClone();
+
+            if (!king.hasMoved)
+            {
+
+                foreach (Piece p in pieces)
+                {
+                    piecesAux.Add(p.DeepClone());
+                }
+
+                foreach (Piece p in pieces)
+                {
+                    if (p.type == 'k' && !p.hasMoved && p.team)
+                    {
+                        if (p.pos.x > 4)
+                        {
+                            if (PieceFromCoordinate(new Coordinate(p.pos.x + 1, p.pos.y)) == null)
+                            {
+                                if (PieceFromCoordinate(new Coordinate(p.pos.x + 2, p.pos.y)) == null)
+                                {
+
+                                }
+                            }
+
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                }
+            }
+            return MovementPossibilities(king, piecesAux);
+        }
         public static Coordinate SumCoordinate(Coordinate c1, Coordinate c2)
         {
             return new Coordinate(c1.x + c2.x, c1.y + c2.y);
         }
         public static Coordinate MultiplyCoordinate(Coordinate c1, int i)
         {
-            return new Coordinate(c1.x * i, c1.y *i);
+            return new Coordinate(c1.x * i, c1.y * i);
         }
         public static Coordinate InvertCoordinate(Coordinate c)
         {
@@ -594,6 +571,6 @@ namespace Chess.GameMechanics
             return new Piece();
         }
 
-        
+
     }
 }
