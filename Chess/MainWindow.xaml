@@ -9,8 +9,7 @@
         
         Title="Xadrez" Height="650" Width="700">
     <Grid Name="grid" ShowGridLines="False" Height="600" Width="600">
-
-
+    
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
@@ -42,7 +41,20 @@
 
         </Grid.RowDefinitions>
         <Label Name="timerBlack"  Content="Chess" FontWeight="ExtraBlack" FontSize="30" FontFamily="Stormfaze" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"/>
-        <Button Name="engineBtn" Content = "Play"  Grid.Row="8" Grid.ColumnSpan="2" Grid.Column="5" Click="Play" />
+        <Button Name="loginBtn" Content = "Login"  Grid.Row="8" Grid.ColumnSpan="2" Grid.Column="5" Click="login_click" />
+
+        <Button Name="playBtn" Content = "Play" Visibility="Hidden"  Grid.Row="8" Grid.ColumnSpan="2" Grid.Column="5" Click="play_click" />
+        
+        <Label Name="lblLogin" Content="Login:" Grid.Row="5" Grid.ColumnSpan="2" Grid.Column="2" Margin="10"/>
+        <Label Name="lblPass" Content="Password:" Grid.Row="6" Grid.ColumnSpan="2" Grid.Column="2" Margin="10"/>
+
+        <Label Name="hostIP" Content="host IP:" Grid.Row="4" Grid.ColumnSpan="2" Grid.Column="2" Margin="10"/>
+
+
+        <TextBox Text="tester" Name="txtLogin" Grid.Row="5" Grid.ColumnSpan="3" Grid.Column="4" Margin="10" TextChanged="txtLogin_changed"/>
+        <TextBox Text="tester" Name="txtPass" Grid.Row="6" Grid.ColumnSpan="3" Grid.Column="4" Margin="10" TextChanged="txtPass_changed"/>
+
+        <TextBox Text="192.168.0.11" Name="txtHost" Grid.Row="4" Grid.ColumnSpan="3" Grid.Column="4" Margin="10"/>
 
 
     </Grid>

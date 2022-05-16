@@ -428,39 +428,107 @@ namespace Chess.GameMechanics
         public List<Coordinate> IncludeCastling(List<Piece> pieces, Piece king)
         {
             List<Piece> piecesAux = new List<Piece>();
-            Piece kingAux = king.DeepClone();
+            Piece kingAux = new Piece();
 
-            if (!king.hasMoved)
+            List<Coordinate> lF = FinalPossibilities(pieces, king);
+
+            if (!IsInCheck(king.team, pieces))
             {
-
-                foreach (Piece p in pieces)
+                if (!king.hasMoved)
                 {
-                    piecesAux.Add(p.DeepClone());
-                }
 
-                foreach (Piece p in pieces)
-                {
-                    if (p.type == 'k' && !p.hasMoved && p.team)
+                    foreach (Piece p in pieces)
                     {
-                        if (p.pos.x > 4)
+                        piecesAux.Add(p.DeepClone());
+                    }
+                    foreach (Piece p in piecesAux)
+                    {
+                        if (p.type == 'k' && p.team == king.team)
                         {
-                            if (PieceFromCoordinate(new Coordinate(p.pos.x + 1, p.pos.y)) == null)
+                            kingAux = p;
+                        }
+                    }
+                    foreach (Piece p in pieces)
+                    {
+                        if (p.type == 'r' && !p.hasMoved && p.team && king.team)
+                        {
+                            if (p.pos.x == 8 && p.pos.y == 8)
                             {
-                                if (PieceFromCoordinate(new Coordinate(p.pos.x + 2, p.pos.y)) == null)
+                                kingAux.pos.x = 6;
+                                kingAux.pos.y = 8;
+                                if (PieceFromCoordinate(new Coordinate(6, 8)) == null && !IsInCheck(kingAux.team, piecesAux))
                                 {
+                                    kingAux.pos.x = 7;
+                                    kingAux.pos.y = 8;
+                                    if (PieceFromCoordinate(new Coordinate(7, 8)) == null && !IsInCheck(kingAux.team, piecesAux))
+                                    {
+                                        lF.Add(new Coordinate(7, 8));
+                                    }
+                                }
 
+                            }
+                            if (p.pos.x == 1 && p.pos.y == 8)
+                            {
+                                kingAux.pos.x = 4;
+                                kingAux.pos.y = 8;
+                                if (PieceFromCoordinate(new Coordinate(4, 8)) == null && !IsInCheck(kingAux.team, piecesAux))
+                                {
+                                    kingAux.pos.x = 3;
+                                    kingAux.pos.y = 8;
+                                    if (PieceFromCoordinate(new Coordinate(3, 8)) == null && !IsInCheck(kingAux.team, piecesAux))
+                                    {
+                                        kingAux.pos.x = 2;
+                                        kingAux.pos.y = 8;
+                                        if (PieceFromCoordinate(new Coordinate(2, 8)) == null && !IsInCheck(kingAux.team, piecesAux))
+                                        {
+                                            lF.Add(new Coordinate(3, 8));
+                                        }
+                                    }
                                 }
                             }
-
                         }
-                        else
+                        if (p.type == 'r' && !p.hasMoved && !p.team && !king.team)
                         {
+                            if (p.pos.x == 1 && p.pos.y == 1)
+                            {
+                                kingAux.pos.x = 6;
+                                kingAux.pos.y = 1;
+                                if (PieceFromCoordinate(new Coordinate(6, 1)) == null && !IsInCheck(kingAux.team, piecesAux))
+                                {
+                                    kingAux.pos.x = 7;
+                                    kingAux.pos.y = 1;
+                                    if (PieceFromCoordinate(new Coordinate(7, 1)) == null && !IsInCheck(kingAux.team, piecesAux))
+                                    {
+                                        lF.Add(new Coordinate(7, 1));
+                                    }
+                                }
 
+                            }
+                            if (p.pos.x == 8 && p.pos.y == 1)
+                            {
+                                kingAux.pos.x = 4;
+                                kingAux.pos.y = 1;
+                                if (PieceFromCoordinate(new Coordinate(4, 1)) == null && !IsInCheck(kingAux.team, piecesAux))
+                                {
+                                    kingAux.pos.x = 3;
+                                    kingAux.pos.y = 1;
+                                    if (PieceFromCoordinate(new Coordinate(3, 1)) == null && !IsInCheck(kingAux.team, piecesAux))
+                                    {
+                                        kingAux.pos.x = 2;
+                                        kingAux.pos.y = 1;
+                                        if (PieceFromCoordinate(new Coordinate(2, 1)) == null && !IsInCheck(kingAux.team, piecesAux))
+                                        {
+                                            lF.Add(new Coordinate(3, 1));
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
-            return MovementPossibilities(king, piecesAux);
+            
+            return lF;
         }
         public static Coordinate SumCoordinate(Coordinate c1, Coordinate c2)
         {
@@ -567,8 +635,8 @@ namespace Chess.GameMechanics
                     return piece;
                 }
             }
-            /// This below should never happen, LUL/
-            return new Piece();
+            
+            return null;
         }
 
 

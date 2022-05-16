@@ -16,6 +16,7 @@ using Chess.GameMechanics;
 using Chess.Properties;
 using System.Media;
 using Force.DeepCloner;
+using SuperSimpleTcp;
 
 namespace Chess
 {
@@ -26,27 +27,169 @@ namespace Chess
     {
         //- Receive these from MainWindow
         static Timer timer = new Timer();
-        static bool player1Color = true;
-        static Player p1 = new();
-        static Player p2 = new();
+        SimpleTcpClient client;
         bool promotion = false;
         //-
-        public Game game = new Game(timer, true, p1, p2);
+        public GameMechanics.Game game;
 
 
         List<Piece> promotionPieces = new List<Piece>();
 
-        public GameWindow()
+        public GameWindow(SimpleTcpClient client, User user1, User user2, bool player1Color)
         {
             InitializeComponent();
+
+            this.client = client;
+
+            client.Events.Connected += Connected;
+            client.Events.Disconnected += Disconnected;
+            client.Events.DataReceived += DataReceived;
+
             DrawBoard();
+
+            Player p1 = new();
+            Player p2 = new();
+
+            p1.username = user1.login;
+            p1.rating = user1.rating;
+            p2.username = user2.login; /////// USE NAME INSTEAD AFTER SQL ADJUSTING
+            p2.rating = user2.rating;
+
+            game = new GameMechanics.Game(timer, player1Color, p1, p2);
+            
+
+            //MessageBox.Show(user1.login + " " + user1.password);
 
             game.running = true;
             DrawPiecesOnBoard(game.board.pieces);
             game.InvisibleCells();
             DrawCells(game);
+
+        }
+        static void Connected(object sender, ConnectionEventArgs e)
+        {
+            //Console.WriteLine($"*** Server {e.IpPort} connected");
         }
 
+        static void Disconnected(object sender, ConnectionEventArgs e)
+        {
+            //Console.WriteLine($"*** Server {e.IpPort} disconnected");
+            MessageBox.Show("Disconnected");
+        }
+        void DataReceived(object sender, DataReceivedEventArgs e)
+        {
+            //Console.WriteLine($"[{e.IpPort}] {Encoding.UTF8.GetString(e.Data)}");
+            string data = (Encoding.UTF8.GetString(e.Data));
+
+            Dispatcher.Invoke(new Action(delegate
+            {
+                GetData(data, e.IpPort);
+                //richTextBox1.Text += data;
+            }));
+        }
+
+        void GetData(string data, string userIP) ////////////////////////////////// GET DATA /////////////////////////////////////
+        {
+
+            if (data.Contains("movePieceR*")) //server reply
+            {
+                if (game.turn != game.player1Color)
+                {
+                    game.board.pieces.Clear();
+                    game.board.cells.Clear();
+                    data = data.Split('*')[1];
+                    int noPecas = Convert.ToInt32(data.Split('#')[0]);
+                    data = data.Split('#')[1];
+
+                    sbyte x = -1;
+                    sbyte y = -1;
+                    char type = '-';
+                    bool hasMoved = true;
+                    bool possibleEnPassant = true;
+                    bool team = true;
+
+                    int nextPiece = 6;
+                    for (int i = 0; i < noPecas * nextPiece; i++)
+                    {
+                        
+                        int j = i % 6;
+                        switch (j)
+                        {
+                            case 0:
+                                x = (sbyte)Char.GetNumericValue(data[i]);
+                                break;
+                            case 1:
+                                y = (sbyte)Char.GetNumericValue(data[i]);
+                                break;
+                            case 2:
+                                type = data[i];
+                                break;
+                            case 3:
+                                if ((int)Char.GetNumericValue(data[i]) == 1)
+                                {
+                                    hasMoved = true;
+                                }
+                                else
+                                {
+                                    hasMoved = false;
+                                }
+                                break;
+
+                            case 4:
+                                if ((int)Char.GetNumericValue(data[i]) == 1)
+                                {
+                                    possibleEnPassant = true;
+                                }
+                                else
+                                {
+                                    possibleEnPassant = false;
+                                }
+                                break;
+                            case 5:
+                                if ((int)Char.GetNumericValue(data[i]) == 1)
+                                {
+                                    team = true;
+                                }
+                                else
+                                {
+                                    team = false;
+                                }
+                                Coordinate newC = new Coordinate(x, y);
+                                
+                                //MessageBox.Show(team.ToString());
+                                Piece newP = new Piece(type, team, newC, possibleEnPassant, hasMoved);                                
+                                game.board.pieces.Add(newP);
+                                break;
+                        }
+
+                    }
+                    //wholeBoard += p.pos.x + p.pos.y + p.type + hasMoved + possibleEnPassant + team;
+                    if (game.turn && !promotion)
+                    {
+                        game.turn = false;
+                    }
+                    else
+                    {
+                        game.turn = true;
+                    }
+                    game.InvisibleCells();
+                    MovePieceSound();
+                    ReDraw();
+                    foreach (Piece pp in game.board.pieces)
+                    {
+                        if (pp.team == game.turn)
+                        {
+                            CheckForMateOrStale(game.turn, game.board.pieces, pp);
+                            break;
+                        }
+                    }
+                    
+                    //MessageBox.Show("pieces" + game.board.pieces.Count());
+                }
+            }
+
+            //MessageBox.Show("User name:" + user.name);
+        }
 
         private void Offer_Draw(object sender, RoutedEventArgs e)
         {
@@ -503,7 +646,7 @@ namespace Chess
 
             return cF;
         }
-        public void DrawCells(Game game) // -- NOT THE BOARD CELLS, Cells for CLICKABLE rectangles, Also adds the Rectangles///
+        public void DrawCells(GameMechanics.Game game) // -- NOT THE BOARD CELLS, Cells for CLICKABLE rectangles, Also adds the Rectangles///
         {
             game.board.clickableRects.Clear();
 
@@ -535,14 +678,14 @@ namespace Chess
                 {
                     brush.Color = Colors.Red;
                     r.Fill = brush;
-                    r.Opacity = 0.1;
+                    r.Opacity = 0.2;
 
                 }
                 if (cell.color == "Blue")
                 {
                     brush.Color = Colors.LightBlue;
                     r.Fill = brush;
-                    r.Opacity = 0.2;
+                    r.Opacity = 0.4;
 
                 }
                 if (cell.color == "BluePromotion")
@@ -563,97 +706,75 @@ namespace Chess
 
         private void ClickOnPiece(object sender, MouseButtonEventArgs e)
         {
-
-            //Detects Piece and Coordinate
-            Coordinate clickedCoordinate = new Coordinate();
-            Piece clickedPiece = new Piece();
-            string cellColor = "";
-
-            for (int i = 0; i < game.board.clickableRects.Count; i++)
+            if (game.player1Color == game.turn)
             {
-                if (sender.Equals(game.board.clickableRects[i]))
+                //Detects Piece and Coordinate
+                Coordinate clickedCoordinate = new Coordinate();
+                Piece clickedPiece = new Piece();
+                string cellColor = "";
+
+                for (int i = 0; i < game.board.clickableRects.Count; i++)
                 {
-                    //Gets the clicked piece
-                    clickedCoordinate = new Coordinate((int)game.board.cells[i].x, (int)game.board.cells[i].y);
-
-                }
-            }
-            foreach (Piece p in game.board.pieces)
-            {
-                if (p.pos.x == clickedCoordinate.x && p.pos.y == clickedCoordinate.y)
-                {
-                    clickedPiece = p;
-                }
-            }
-
-
-
-            foreach (Cell c in game.board.cells)
-            {
-                if (clickedCoordinate.x == c.x && clickedCoordinate.y == c.y)
-                {
-                    cellColor = c.color;
-                }
-            }
-
-            if (game.running && !promotion)
-            {
-                if (game.state == "selectPiece" && cellColor == "Invisible")
-                {
-                    foreach (Piece p in game.board.pieces)
+                    if (sender.Equals(game.board.clickableRects[i]))
                     {
-                        if (p.pos.x == clickedCoordinate.x && p.pos.y == clickedCoordinate.y)
+                        //Gets the clicked piece
+                        clickedCoordinate = new Coordinate((int)game.board.cells[i].x, (int)game.board.cells[i].y);
+
+                    }
+                }
+                foreach (Piece p in game.board.pieces)
+                {
+                    if (p.pos.x == clickedCoordinate.x && p.pos.y == clickedCoordinate.y)
+                    {
+                        clickedPiece = p;
+                    }
+                }
+
+
+
+                foreach (Cell c in game.board.cells)
+                {
+                    if (clickedCoordinate.x == c.x && clickedCoordinate.y == c.y)
+                    {
+                        cellColor = c.color;
+                    }
+                }
+
+                if (game.running && !promotion)
+                {
+                    if (game.state == "selectPiece" && cellColor == "Invisible")
+                    {
+                        foreach (Piece p in game.board.pieces)
                         {
-                            p.isClicked = true;
+                            if (p.pos.x == clickedCoordinate.x && p.pos.y == clickedCoordinate.y)
+                            {
+                                p.isClicked = true;
+                            }
                         }
-                    }
-                    game.state = "selectCoordinate";
-                    game.board.cells.Clear();
-                    game.board.clickableRects.Clear();
-                    game.RedCells(game.board.FinalPossibilities(game.board.pieces, clickedPiece));
-
-                    game.BlueCells(clickedPiece);
-
-                    ReDraw();
-                }
-
-                if (game.state == "selectCoordinate" && cellColor == "Blue")
-                {
-                    foreach (Piece p in game.board.pieces)
-                    {
-                        p.isClicked = false;
-                    }
-                    game.state = "selectPiece";
-                    game.board.cells.Clear();
-                    game.board.clickableRects.Clear();
-                    game.InvisibleCells();
-
-                    ReDraw();
-                }
-
-                if (game.state == "selectCoordinate" && cellColor == "Red")
-                {
-                    Piece p = new Piece();
-                    foreach (Piece piece in game.board.pieces)
-                    {
-                        if (piece.isClicked)
+                        game.state = "selectCoordinate";
+                        game.board.cells.Clear();
+                        game.board.clickableRects.Clear();
+                        if (clickedPiece.type == 'k')
                         {
-                            p = piece;
+                            game.RedCells(game.board.IncludeCastling(game.board.pieces, clickedPiece));
                         }
+                        else
+                        {
+                            game.RedCells(game.board.FinalPossibilities(game.board.pieces, clickedPiece));
+                        }
+
+
+                        game.BlueCells(clickedPiece);
+
+                        ReDraw();
                     }
-                    p.isClicked = false;
-                    p.hasMoved = true;
-                    if (game.turn)
+
+                    if (game.state == "selectCoordinate" && cellColor == "Blue")
                     {
-                        game.turn = false;
-                    }
-                    else
-                    {
-                        game.turn = true;
-                    }
-                    promotion = MovePiece(p, clickedCoordinate, game.board);
-                    if (!promotion)
-                    {
+                        foreach (Piece p in game.board.pieces)
+                        {
+                            p.isClicked = false;
+                        }
                         game.state = "selectPiece";
                         game.board.cells.Clear();
                         game.board.clickableRects.Clear();
@@ -661,58 +782,147 @@ namespace Chess
 
                         ReDraw();
                     }
-                }
-            }
-            if (game.running && promotion)
-            {
-                foreach (Piece p in promotionPieces)
-                {
-                    if (p.pos.x == clickedCoordinate.x && p.pos.y == clickedCoordinate.y)
+
+                    if (game.state == "selectCoordinate" && cellColor == "Red")
                     {
-                        clickedPiece = p.DeepClone();
+                        Piece p = new Piece();
+                        foreach (Piece piece in game.board.pieces)
+                        {
+                            if (piece.isClicked)
+                            {
+                                p = piece;
+                            }
+                        }
+                        p.isClicked = false;
+                        p.hasMoved = true;
+                        
+
+                        promotion = MovePiece(p, clickedCoordinate, game.board);
+                        
+
+                        if (!promotion)
+                        {
+                            if (game.turn)
+                            {
+                                game.turn = false;
+                            }
+                            else
+                            {
+                                game.turn = true;
+                            }
+
+                            game.state = "selectPiece";
+                            game.board.cells.Clear();
+                            game.board.clickableRects.Clear();
+                            game.InvisibleCells();
+
+                            ReDraw();
+                        }
                     }
                 }
-                if (game.state == "promotion" && cellColor == "BluePromotion")
+                if (game.running && promotion)
                 {
-                    foreach (Piece p in game.board.pieces)
+                    foreach (Piece p in promotionPieces)
                     {
-                        if (p.team)
+                        if (p.pos.x == clickedCoordinate.x && p.pos.y == clickedCoordinate.y)
                         {
-                            if (p.type == 'p' && p.pos.y == 1)
+                            clickedPiece = p.DeepClone();
+                        }
+                    }
+                    if (game.state == "promotion" && cellColor == "BluePromotion")
+                    {
+                        foreach (Piece p in game.board.pieces)
+                        {
+                            if (p.team)
                             {
-                                p.type = clickedPiece.type;
+                                if (p.type == 'p' && p.pos.y == 1)
+                                {
+                                    p.type = clickedPiece.type;
+                                }
                             }
+                            else
+                            {
+                                if (p.type == 'p' && p.pos.y == 9)
+                                {
+                                    p.type = clickedPiece.type;
+                                }
+                            }
+                        }
+
+                        promotion = false;
+                        promotionPieces.Clear();
+                        game.board.cells.Clear();
+                        game.board.clickableRects.Clear();
+                        bool team2 = true;
+                        game.InvisibleCells();
+                        ReDraw();
+                        if (clickedPiece.team)
+                        {
+                            team2 = false;
+                        }
+                        game.state = "selectPiece";
+
+                        string wholeBoard = "movePiece*" + game.board.pieces.Count() + "#";
+
+                        foreach (Piece pieceMoving in game.board.pieces)
+                        {
+
+                            int hasMoved, possibleEnPassant, team;
+                            if (pieceMoving.hasMoved)
+                            {
+                                hasMoved = 1;
+                            }
+                            else
+                            {
+                                hasMoved = 0;
+                            }
+                            if (pieceMoving.possiblePassant)
+                            {
+                                possibleEnPassant = 1;
+                            }
+                            else
+                            {
+                                possibleEnPassant = 0;
+                            }
+                            if (pieceMoving.team)
+                            {
+                                team = 1;
+                            }
+                            else
+                            {
+                                team = 0;
+                            }
+                            wholeBoard += pieceMoving.pos.x.ToString() + pieceMoving.pos.y.ToString() + pieceMoving.type + hasMoved.ToString() + possibleEnPassant.ToString() + team.ToString();
+                        }
+                        client.SendAsync(wholeBoard);
+                        ///////////////////////////////////////666666666666
+
+                        CheckForMateOrStale(team2, game.board.pieces, clickedPiece);
+
+                        if (game.turn)
+                        {
+                            game.turn = false;
                         }
                         else
                         {
-                            if (p.type == 'p' && p.pos.y == 9)
-                            {
-                                p.type = clickedPiece.type;
-                            }
+                            game.turn = true;
                         }
-                    }
 
-                    promotion = false;
-                    promotionPieces.Clear();
-                    game.board.cells.Clear();
-                    game.board.clickableRects.Clear();
-                    bool team2 = true;
-                    game.InvisibleCells();
-                    ReDraw();
-                    if (clickedPiece.team)
-                    {
-                        team2 = false;
                     }
-                    game.state = "selectPiece";
-                    CheckForMateOrStale(team2, game.board.pieces, clickedPiece);
                 }
+                
             }
-
         }
         bool MovePiece(Piece p, Coordinate c, Board board) //returns false if promotion
         {
+            if (game.player1Color != game.turn)
+            {
+                
+            }
+
             if (!promotion)
             {
+                bool castling = false;
                 int xToRemove = -1;
                 int yToRemove = -1;
                 bool hasToRemove = false;
@@ -730,6 +940,37 @@ namespace Chess
                         p.possiblePassant = true;
                     }
                 }
+                if (p.type == 'k' && Math.Abs(p.pos.x - c.x) > 1)
+                {
+                    castling = true;
+                    if (p.team)
+                    {
+                        if (c.x == 7)
+                        {
+                            Piece rook = game.board.PieceFromCoordinate(new Coordinate(8, 8));
+                            rook.pos.x = 6;
+                        }
+                        if (c.x == 3)
+                        {
+                            Piece rook = game.board.PieceFromCoordinate(new Coordinate(1, 8));
+                            rook.pos.x = 6;
+                        }
+                    }
+                    else
+                    {
+                        if (c.x == 7)
+                        {
+                            Piece rook = game.board.PieceFromCoordinate(new Coordinate(8, 1));
+                            rook.pos.x = 6;
+                        }
+                        if (c.x == 3)
+                        {
+                            Piece rook = game.board.PieceFromCoordinate(new Coordinate(1, 1));
+                            rook.pos.x = 6;
+                        }
+                    }
+                    
+                }
 
 
                 foreach (Piece p2 in board.pieces)
@@ -741,15 +982,24 @@ namespace Chess
                         hasToRemove = true;
                     }
                 }
-                if (hasToRemove)
+                if (!castling)
                 {
-                    board.pieces.RemoveAll(p2 => (int)p2.pos.x == xToRemove && (int)p2.pos.y == yToRemove);
-                    TakePieceSound();
+                    if (hasToRemove)
+                    {
+                        board.pieces.RemoveAll(p2 => (int)p2.pos.x == xToRemove && (int)p2.pos.y == yToRemove);
+                        TakePieceSound();
+                    }
+                    else
+                    {
+                        MovePieceSound();
+                    }
                 }
                 else
                 {
                     MovePieceSound();
+                    TakePieceSound();
                 }
+                
 
                 p.pos.x = c.x;
                 p.pos.y = c.y;
@@ -775,7 +1025,9 @@ namespace Chess
                             {
                                 if (p.pos.y == 1)
                                 {
-                                    Promotion(p.team, p);
+                                    promotion = true;
+                                    game.state = "promotion";
+                                    Promotion(p.team, p);                                    
                                     return true;
                                 }
                             }
@@ -783,6 +1035,8 @@ namespace Chess
                             {
                                 if (p.pos.y == 9)
                                 {
+                                    promotion = true;
+                                    game.state = "promotion";
                                     Promotion(p.team, p);
                                     return true;
                                 }
@@ -791,13 +1045,51 @@ namespace Chess
                     }
 
                 }
-
                 CheckForMateOrStale(team2, game.board.pieces, p);
+            }
+
+            if (game.state != "promotion")
+            {
+                /////////////666666666666666666666666
+                string wholeBoard = "movePiece*" + game.board.pieces.Count() + "#";
+
+                foreach (Piece pieceMoving in game.board.pieces)
+                {
+
+                    int hasMoved, possibleEnPassant, team;
+                    if (pieceMoving.hasMoved)
+                    {
+                        hasMoved = 1;
+                    }
+                    else
+                    {
+                        hasMoved = 0;
+                    }
+                    if (pieceMoving.possiblePassant)
+                    {
+                        possibleEnPassant = 1;
+                    }
+                    else
+                    {
+                        possibleEnPassant = 0;
+                    }
+                    if (pieceMoving.team)
+                    {
+                        team = 1;
+                    }
+                    else
+                    {
+                        team = 0;
+                    }
+                    wholeBoard += pieceMoving.pos.x.ToString() + pieceMoving.pos.y.ToString() + pieceMoving.type + hasMoved.ToString() + possibleEnPassant.ToString() + team.ToString();
+                }
+                client.SendAsync(wholeBoard);
+                ///////////////////////////////////////666666666666
             }
 
             return false;
         }
-        void CheckForMateOrStale(bool team2, List<Piece> pieces, Piece p)
+        public void CheckForMateOrStale(bool team2, List<Piece> pieces, Piece p)
         {
             if (game.board.IsInCheck(team2, game.board.pieces)) //CHECKMATE
             {
@@ -945,6 +1237,9 @@ namespace Chess
             DrawPiecesOnBoard(game.board.pieces);
             DrawCells(game);
         }
+        
 
     }
+    
+
 }

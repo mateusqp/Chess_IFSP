@@ -26,7 +26,18 @@ namespace Chess.GameMechanics
             exists = true;
             isClicked = false;
         }
-        
+
+        public Piece(char type, bool team, Coordinate pos, bool possibleEnPassant, bool hasMoved)
+        {
+            this.pos = pos;
+            this.team = team;
+            this.type = type;
+            this.possiblePassant = possibleEnPassant;
+            this.hasMoved = hasMoved;
+            exists = true;
+            isClicked = false;
+        }
+
         public Piece()
         { }
     }
