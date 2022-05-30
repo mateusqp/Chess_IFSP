@@ -8,10 +8,10 @@ namespace Chess.GameMechanics
 {
     public class Cell
     {
-        public Coordinate cellCoordinate;
-        public int x;
-        public int y;
-        public string color;
+        public Coordinate cellCoordinate { get; set; }
+        public int x { get; set; }
+        public int y { get; set; }
+        public string color { get; set; }
         public Cell(int x, int y, string color)
         {
             this.x = x;

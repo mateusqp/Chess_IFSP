@@ -8,8 +8,8 @@ namespace Chess.GameMechanics
 {
     public class Coordinate
     {
-        public sbyte x;
-        public sbyte y;
+        public sbyte x { get; set; }
+        public sbyte y { get; set; }
 
         public Coordinate(sbyte x, sbyte y)
         {

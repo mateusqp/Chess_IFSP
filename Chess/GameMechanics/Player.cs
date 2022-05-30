@@ -8,9 +8,9 @@ namespace Chess.GameMechanics
 {
     public class Player
     {
-        public string username;
-        public int rating;
-        public int photoID;
+        public string username { get; set; }
+        public int rating { get; set; }
+        public int photoID { get; set; }
 
         public Player()
         {

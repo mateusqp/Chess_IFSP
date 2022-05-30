@@ -11,11 +11,15 @@ namespace Chess.GameMechanics
 {
     public class Board
     {
-        public List<Piece> pieces = new();
-        public List<Cell> cells = new List<Cell>();
-        public List<Rectangle> clickableRects = new List<Rectangle>();
+        public List<Piece> pieces { get; set; }
+        public List<Cell> cells { get; set; }
+        public List<Rectangle> clickableRects { get; set; }
         public Board(bool team1) //Standard Board
         {
+            pieces = new List<Piece>();
+            cells = new List<Cell>();
+            clickableRects = new List<Rectangle>();
+
             if (team1 || !team1) //Doesnt matter which team is which, inverting coordinates in game.xaml.cs will do it;
             {
                 for (int y = 1; y < 9; y++) //inserting pieces

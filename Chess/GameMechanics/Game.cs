@@ -8,17 +8,17 @@ namespace Chess.GameMechanics
 {
     public class Game
     {
-        public Notation notation;
-        public ChessTimer timer;
-        public Board board;
-        public Player player1;
-        public Player player2;
-        public bool player1Color;
-        public bool running;
-        public bool turn; //false = black's turn; true = white's turn
-        public string state; //selectPiece, selectCoordinate
-        public bool hasStarted; //first move
-        public int turnInt;
+        public Notation notation { get; set; }
+        public ChessTimer timer { get; set; }
+        public Board board { get; set; }
+        public Player player1 { get; set; }
+        public Player player2 { get; set; }
+        public bool player1Color { get; set; }
+        public bool running { get; set; }
+        public bool turn { get; set; } //false = black's turn; true = white's turn
+        public string state { get; set; } //selectPiece, selectCoordinate
+        public bool hasStarted { get; set; } //first move
+        public int turnInt { get; set; }
 
         public Game(ChessTimer timer, bool player1Color, Player player1, Player player2)
         {

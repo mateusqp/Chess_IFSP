@@ -8,13 +8,13 @@ namespace Chess
 {
     public class User
     {
-        public string login;
-        public string password;
-        public string userIP;
-        public bool loggedIn;
-        public string name;
-        public int rating;
-        public bool findingMatch;
+        public string login { get; set; }
+        public string password { get; set; }
+        public string userIP { get; set; }
+        public bool loggedIn { get; set; }
+        public string name { get; set; }
+        public int rating { get; set; }
+        public bool findingMatch { get; set; }
 
         public User(string login, string password, string userIP)
         {

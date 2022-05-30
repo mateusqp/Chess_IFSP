@@ -8,9 +8,9 @@ namespace Chess.GameMechanics
 {
     public class ChessTimer
     {        
-        public float increment;
-        public int p1Time;
-        public int p2Time;
+        public float increment { get; set; }
+        public int p1Time { get; set; }
+        public int p2Time { get; set; }
 
         public ChessTimer() //Standard
         {

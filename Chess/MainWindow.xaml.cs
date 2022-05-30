@@ -26,23 +26,23 @@ namespace Chess
     /// </summary>
     public partial class MainWindow : Window
     {
-        User user1 = new User();
-        User user2 = new User();
-        bool player1Color = false;
-        public string hostIP_ = "127.0.0.1";
+        User user1 { get; set; }
+        User user2 { get; set; }
+        bool player1Color { get; set; }
+        public string hostIP_ { get; set; }
 
-        SimpleTcpClient client;
+        SimpleTcpClient client { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
-
+            user1 = new User();
+            user2 = new User();
+            player1Color = false;
+            hostIP_ = "127.0.0.1";
             
             user1.name = null;
 
-            
-
-            
             
         }
 

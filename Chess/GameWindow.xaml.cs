@@ -1332,7 +1332,7 @@ namespace Chess
                 }
             }
 
-            if (viewer && game.running)
+            if (game.hasStarted && viewer && game.running)
             {
                 if (v_turn)
                 {
