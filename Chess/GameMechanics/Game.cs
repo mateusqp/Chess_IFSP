@@ -17,7 +17,8 @@ namespace Chess.GameMechanics
         public bool running;
         public bool turn; //false = black's turn; true = white's turn
         public string state; //selectPiece, selectCoordinate
-        public bool hasStarted; //first move        
+        public bool hasStarted; //first move
+        public int turnInt;
 
         public Game(ChessTimer timer, bool player1Color, Player player1, Player player2)
         {
@@ -29,7 +30,7 @@ namespace Chess.GameMechanics
             turn = true;
             state = "selectPiece";
             hasStarted = false;
-            
+            turnInt = 1;
         }
 
         #region Cells

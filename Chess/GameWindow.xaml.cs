@@ -28,18 +28,18 @@ namespace Chess
     public partial class GameWindow : Window
     {
         //- Receive these from MainWindow
-        Chess.GameMechanics.ChessTimer timer;
-        SimpleTcpClient client;
-        bool promotion = false;
+        Chess.GameMechanics.ChessTimer timer { get; set; }
+        SimpleTcpClient client { get; set; }
+        bool promotion { get; set; }
         //-
-        public GameMechanics.Game game;
-        bool viewer;
-        bool v_turn = true; //viewer turn
+        public GameMechanics.Game game { get; set; }
+        bool viewer { get; set; }
+        bool v_turn { get; set; } //viewer turn
 
-        Player p1 = new();
-        Player p2 = new();
+        Player p1 { get; set; }
+        Player p2 { get; set; }
 
-        WaitingRoom wr;
+        WaitingRoom wr { get; set; }
 
         System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
         
@@ -64,6 +64,10 @@ namespace Chess
             timerBlack.Content = timer.TimeString(timer.p2Time);
             timerWhite.Content = timer.TimeString(timer.p1Time);
 
+            p1 = new Player();
+            p2 = new Player();
+
+            promotion = false;
 
             this.client = client;
 
@@ -125,7 +129,7 @@ namespace Chess
                 MessageBox.Show("Win by resignation");                                
             }
 
-            //"movePieceR*" + game.board.pieces.Count() + "#" + "!" + timer.p1Time.ToString() + "_" + timer.p2Time.ToString();
+            //"movePieceR*" + game.board.pieces.Count() + "#" + "!" + timer.p1Time.ToString() + "_" + timer.p2Time.ToString()+1_True;
             if (data.Contains("movePieceR*")) //server reply
             {
                 game.hasStarted = true;
@@ -134,13 +138,16 @@ namespace Chess
                     game.board.pieces.Clear();
                     game.board.cells.Clear();
                     data = data.Split('*')[1];
-                    timer.p1Time = Convert.ToInt32(data.Split('!')[1].Split('_')[0]);
-                    timer.p2Time = Convert.ToInt32(data.Split('!')[1].Split('_')[1]);
+                    timer.p1Time = Convert.ToInt32(data.Split('!')[1].Split('-')[0].Split('_')[0]);
+                    //0#!589_599-False
+                    timer.p2Time = Convert.ToInt32(data.Split('!')[1].Split('-')[0].Split('_')[1]);
+                    string turnIntS = data.Split('-')[1];
+                    game.turnInt = Convert.ToInt32(turnIntS);
                     data = data.Split('!')[0];
                     int noPecas = Convert.ToInt32(data.Split('#')[0]);
                     data = data.Split('#')[1];
 
-                    if (v_turn)
+                    if (game.turnInt % 2 == 0)
                     {
                         v_turn = false;
                     }
@@ -149,7 +156,7 @@ namespace Chess
                         v_turn = true;
                     }
 
-                    data = data.Split('_')[0];
+                    data = data.Split('!')[0];
                     
 
                     sbyte x = -1;
@@ -1302,8 +1309,13 @@ namespace Chess
                 }
                 wholeBoard += pieceMoving.pos.x.ToString() + pieceMoving.pos.y.ToString() + pieceMoving.type + hasMoved.ToString() + possibleEnPassant.ToString() + team.ToString();
             }
-            await client.SendAsync("movePiece*" + game.board.pieces.Count() + "#" + wholeBoard + "!" + timer.p1Time.ToString() + "_" + timer.p2Time.ToString());
+            if (!viewer)
+            {
+                game.turnInt++;
+            }
+            await client.SendAsync("movePiece*" + game.board.pieces.Count() + "#" + wholeBoard + "!" + timer.p1Time.ToString() + "_" + timer.p2Time.ToString() + "-" + game.turnInt);
             ///////////////////////////////////////666666666666
+            
         }
 
         private void dispatcherTimer_Tick(object sender, EventArgs e)

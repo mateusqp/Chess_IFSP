@@ -20,9 +20,9 @@ namespace Chess
     /// </summary>
     public partial class WaitingRoom : Window
     {
-        User user1 = new User();
-        SimpleTcpClient client;
-        public bool gameHasStarted;
+        User user1 { get; set; }
+        SimpleTcpClient client { get; set; }
+        public bool gameHasStarted { get; set; }
         public WaitingRoom(User user, SimpleTcpClient client, string usersOnline)
         {
             InitializeComponent();
@@ -92,7 +92,7 @@ namespace Chess
         {
             if (data.Contains("watchR*"))
             {
-                MessageBox.Show("watchR ok");
+                //MessageBox.Show("watchR ok");
                 data = data.Split('*')[1];
                 //sqlName0!sqlName1#rating1_rating2
                 string ratingsString = data.Split('#')[1];
