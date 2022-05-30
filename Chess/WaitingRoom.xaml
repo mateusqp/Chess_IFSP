@@ -24,7 +24,11 @@
         </Grid.ColumnDefinitions>
 
         <Button Name="btnFindMatch" Content="Find match..." Click="btnFindMatch_Click" Grid.Row="3" Grid.Column="2" Width="80"/>
-        <RichTextBox Name="gamesList" Grid.Row="2" Grid.Column="2" />
+        <Label Name="labelLoadingGame" Content="Finding Match " 
+               FontSize="16" FontWeight="Bold" Grid.Row="2" 
+               Grid.Column="2" Panel.ZIndex="2" Width="200" 
+               Height="50" Visibility="Hidden"/>
+        <ListBox Name="gamesList" Grid.Row="2" Grid.Column="2" Panel.ZIndex="1" PreviewMouseRightButtonDown="watchGame_click"/>
         <ListBox  Name="playersList"  Grid.Row="2" Grid.Column="3" PreviewMouseRightButtonDown="listBox1_MouseRightClick" />
     </Grid>    
 </Window>

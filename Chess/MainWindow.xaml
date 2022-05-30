@@ -41,7 +41,8 @@
 
         </Grid.RowDefinitions>
         <Label Name="timerBlack"  Content="Chess" FontWeight="ExtraBlack" FontSize="30" FontFamily="Stormfaze" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"/>
-        <Button Name="loginBtn" Content = "Login"  Grid.Row="8" Grid.ColumnSpan="2" Grid.Column="5" Click="login_click" />
+        <Button Name="loginBtn" Content = "Login"  Grid.Row="8" Grid.ColumnSpan="2" Grid.Column="4" Click="login_click" />
+        <Button Name="createAccBtn" Content = "Create Account"  Grid.Row="8" Grid.ColumnSpan="2" Grid.Column="7" Click="createAcc_click" />
 
         <Button Name="playBtn" Content = "Play" Visibility="Hidden"  Grid.Row="8" Grid.ColumnSpan="2" Grid.Column="5" Click="play_click" />
         
@@ -52,7 +53,7 @@
 
 
         <TextBox Text="tester" Name="txtLogin" Grid.Row="5" Grid.ColumnSpan="3" Grid.Column="4" Margin="10" TextChanged="txtLogin_changed"/>
-        <TextBox Text="tester" Name="txtPass" Grid.Row="6" Grid.ColumnSpan="3" Grid.Column="4" Margin="10" TextChanged="txtPass_changed"/>
+        <TextBox FontFamily="WebDings" Text="tester" Name="txtPass" Grid.Row="6" Grid.ColumnSpan="3" Grid.Column="4" Margin="10" TextChanged="txtPass_changed"/>
 
         <TextBox Text="192.168.0.11" Name="txtHost" Grid.Row="4" Grid.ColumnSpan="3" Grid.Column="4" Margin="10"/>
 

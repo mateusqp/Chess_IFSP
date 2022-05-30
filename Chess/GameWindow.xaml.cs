@@ -17,6 +17,8 @@ using Chess.Properties;
 using System.Media;
 using Force.DeepCloner;
 using SuperSimpleTcp;
+using System.Windows.Threading;
+using System.Threading;
 
 namespace Chess
 {
@@ -26,18 +28,37 @@ namespace Chess
     public partial class GameWindow : Window
     {
         //- Receive these from MainWindow
-        static Timer timer = new Timer();
+        Chess.GameMechanics.ChessTimer timer;
         SimpleTcpClient client;
         bool promotion = false;
         //-
         public GameMechanics.Game game;
 
+        Player p1 = new();
+        Player p2 = new();
+
+        WaitingRoom wr;
+
+        System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+        
 
         List<Piece> promotionPieces = new List<Piece>();
 
-        public GameWindow(SimpleTcpClient client, User user1, User user2, bool player1Color)
+        public GameWindow(SimpleTcpClient client, User user1, User user2, bool player1Color, WaitingRoom wr)
         {
             InitializeComponent();
+
+            this.wr = wr;
+
+            timer = new Chess.GameMechanics.ChessTimer();
+
+            dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+            dispatcherTimer.Start();
+
+            timerBlack.Content = timer.TimeString(timer.p2Time);
+            timerWhite.Content = timer.TimeString(timer.p1Time);
+
 
             this.client = client;
 
@@ -47,8 +68,11 @@ namespace Chess
 
             DrawBoard();
 
-            Player p1 = new();
-            Player p2 = new();
+            if (!player1Color)
+            {
+                timerBlack.SetValue(Grid.RowProperty, 7);
+                timerWhite.SetValue(Grid.RowProperty, 0);
+            }
 
             p1.username = user1.login;
             p1.rating = user1.rating;
@@ -66,15 +90,28 @@ namespace Chess
             DrawCells(game);
 
         }
-        static void Connected(object sender, ConnectionEventArgs e)
+        void Connected(object sender, ConnectionEventArgs e)
         {
-            //Console.WriteLine($"*** Server {e.IpPort} connected");
+            
         }
 
-        static void Disconnected(object sender, ConnectionEventArgs e)
+        void Disconnected(object sender, ConnectionEventArgs e)
         {
-            //Console.WriteLine($"*** Server {e.IpPort} disconnected");
-            MessageBox.Show("Disconnected");
+            if (game.player1Color)
+            {
+                SendThisPosition();
+                Wait(1);
+                client.Send("gameFinished*black");
+            }
+            else
+            {
+                SendThisPosition();
+                Wait(1);
+                client.Send("gameFinished*white");
+            }
+            wr.btnFindMatch.IsEnabled = true;
+            wr.Show();
+            wr.gameHasStarted = false;
         }
         void DataReceived(object sender, DataReceivedEventArgs e)
         {
@@ -90,14 +127,18 @@ namespace Chess
 
         void GetData(string data, string userIP) ////////////////////////////////// GET DATA /////////////////////////////////////
         {
-
+            //"movePieceR*" + game.board.pieces.Count() + "#" + "!" + timer.p1Time.ToString() + "_" + timer.p2Time.ToString();
             if (data.Contains("movePieceR*")) //server reply
             {
+                game.hasStarted = true;
                 if (game.turn != game.player1Color)
                 {
                     game.board.pieces.Clear();
                     game.board.cells.Clear();
                     data = data.Split('*')[1];
+                    timer.p1Time = Convert.ToInt32(data.Split('!')[1].Split('_')[0]);
+                    timer.p2Time = Convert.ToInt32(data.Split('!')[1].Split('_')[1]);
+                    data = data.Split('!')[0];
                     int noPecas = Convert.ToInt32(data.Split('#')[0]);
                     data = data.Split('#')[1];
 
@@ -270,7 +311,7 @@ namespace Chess
                     grid.Children.Add(wr);
 
                     Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
-                    if (!game.player1Color)
+                    if (!game.player1Color && piece.pos.x != 10)
                     {
                         invertCoord = InvertCoordinate(invertCoord);
                     }
@@ -292,7 +333,7 @@ namespace Chess
                     br.Source = bri;
                     grid.Children.Add(br);
                     Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
-                    if (!game.player1Color)
+                    if (!game.player1Color && piece.pos.x != 10)
                     {
                         invertCoord = InvertCoordinate(invertCoord);
                     }
@@ -321,7 +362,7 @@ namespace Chess
                     grid.Children.Add(wn);
 
                     Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
-                    if (!game.player1Color)
+                    if (!game.player1Color && piece.pos.x != 10)
                     {
                         invertCoord = InvertCoordinate(invertCoord);
                     }
@@ -341,7 +382,7 @@ namespace Chess
                     grid.Children.Add(bn);
 
                     Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
-                    if (!game.player1Color)
+                    if (!game.player1Color && piece.pos.x != 10)
                     {
                         invertCoord = InvertCoordinate(invertCoord);
                     }
@@ -370,7 +411,7 @@ namespace Chess
                     grid.Children.Add(wb);
 
                     Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
-                    if (!game.player1Color)
+                    if (!game.player1Color && piece.pos.x != 10)
                     {
                         invertCoord = InvertCoordinate(invertCoord);
                     }
@@ -390,7 +431,7 @@ namespace Chess
                     grid.Children.Add(bb);
 
                     Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
-                    if (!game.player1Color)
+                    if (!game.player1Color && piece.pos.x != 10)
                     {
                         invertCoord = InvertCoordinate(invertCoord);
                     }
@@ -420,7 +461,7 @@ namespace Chess
                     grid.Children.Add(wq);
 
                     Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
-                    if (!game.player1Color)
+                    if (!game.player1Color && piece.pos.x != 10)
                     {
                         invertCoord = InvertCoordinate(invertCoord);
                     }
@@ -440,7 +481,7 @@ namespace Chess
                     grid.Children.Add(bq);
 
                     Coordinate invertCoord = new Coordinate(piece.pos.x, piece.pos.y);
-                    if (!game.player1Color)
+                    if (!game.player1Color && piece.pos.x != 10)
                     {
                         invertCoord = InvertCoordinate(invertCoord);
                     }
@@ -576,73 +617,81 @@ namespace Chess
         {
             Coordinate cF = new Coordinate();
 
-            switch (c.x)
+            if (c.x != 10) //Promotion pieces
             {
-                case 9:
-                    cF.x = 0;
-                    break;
-                case 8:
-                    cF.x = 1;
-                    break;
-                case 7:
-                    cF.x = 2;
-                    break;
-                case 6:
-                    cF.x = 3;
-                    break;
-                case 5:
-                    cF.x = 4;
-                    break;
-                case 4:
-                    cF.x = 5;
-                    break;
-                case 3:
-                    cF.x = 6;
-                    break;
-                case 2:
-                    cF.x = 7;
-                    break;
-                case 1:
-                    cF.x = 8;
-                    break;
-                case 0:
-                    cF.x = 9;
-                    break;
-            }
+                switch (c.x)
+                {
+                    case 9:
+                        cF.x = 0;
+                        break;
+                    case 8:
+                        cF.x = 1;
+                        break;
+                    case 7:
+                        cF.x = 2;
+                        break;
+                    case 6:
+                        cF.x = 3;
+                        break;
+                    case 5:
+                        cF.x = 4;
+                        break;
+                    case 4:
+                        cF.x = 5;
+                        break;
+                    case 3:
+                        cF.x = 6;
+                        break;
+                    case 2:
+                        cF.x = 7;
+                        break;
+                    case 1:
+                        cF.x = 8;
+                        break;
+                    case 0:
+                        cF.x = 9;
+                        break;
+                }
 
-            switch (c.y)
-            {
-                case 9:
-                    cF.y = 0;
-                    break;
-                case 8:
-                    cF.y = 1;
-                    break;
-                case 7:
-                    cF.y = 2;
-                    break;
-                case 6:
-                    cF.y = 3;
-                    break;
-                case 5:
-                    cF.y = 4;
-                    break;
-                case 4:
-                    cF.y = 5;
-                    break;
-                case 3:
-                    cF.y = 6;
-                    break;
-                case 2:
-                    cF.y = 7;
-                    break;
-                case 1:
-                    cF.y = 8;
-                    break;
-                case 0:
-                    cF.y = 9;
-                    break;
+                switch (c.y)
+                {
+                    case 9:
+                        cF.y = 0;
+                        break;
+                    case 8:
+                        cF.y = 1;
+                        break;
+                    case 7:
+                        cF.y = 2;
+                        break;
+                    case 6:
+                        cF.y = 3;
+                        break;
+                    case 5:
+                        cF.y = 4;
+                        break;
+                    case 4:
+                        cF.y = 5;
+                        break;
+                    case 3:
+                        cF.y = 6;
+                        break;
+                    case 2:
+                        cF.y = 7;
+                        break;
+                    case 1:
+                        cF.y = 8;
+                        break;
+                    case 0:
+                        cF.y = 9;
+                        break;
+                }
             }
+            else
+            {
+                cF = c;
+            }
+            
 
             return cF;
         }
@@ -655,7 +704,7 @@ namespace Chess
                 Rectangle r = new Rectangle();
                 SolidColorBrush brush = new SolidColorBrush();
                 Coordinate invertCoord = new Coordinate(cell.x + 1, cell.y + 1);
-                if (!game.player1Color)
+                if (!game.player1Color && cell.x < 9)
                 {
                     invertCoord = InvertCoordinate(invertCoord);
                 }
@@ -820,6 +869,7 @@ namespace Chess
                         }
                     }
                 }
+                
                 if (game.running && promotion)
                 {
                     foreach (Piece p in promotionPieces)
@@ -842,7 +892,7 @@ namespace Chess
                             }
                             else
                             {
-                                if (p.type == 'p' && p.pos.y == 9)
+                                if (p.type == 'p' && p.pos.y == 8)
                                 {
                                     p.type = clickedPiece.type;
                                 }
@@ -862,40 +912,7 @@ namespace Chess
                         }
                         game.state = "selectPiece";
 
-                        string wholeBoard = "movePiece*" + game.board.pieces.Count() + "#";
-
-                        foreach (Piece pieceMoving in game.board.pieces)
-                        {
-
-                            int hasMoved, possibleEnPassant, team;
-                            if (pieceMoving.hasMoved)
-                            {
-                                hasMoved = 1;
-                            }
-                            else
-                            {
-                                hasMoved = 0;
-                            }
-                            if (pieceMoving.possiblePassant)
-                            {
-                                possibleEnPassant = 1;
-                            }
-                            else
-                            {
-                                possibleEnPassant = 0;
-                            }
-                            if (pieceMoving.team)
-                            {
-                                team = 1;
-                            }
-                            else
-                            {
-                                team = 0;
-                            }
-                            wholeBoard += pieceMoving.pos.x.ToString() + pieceMoving.pos.y.ToString() + pieceMoving.type + hasMoved.ToString() + possibleEnPassant.ToString() + team.ToString();
-                        }
-                        client.SendAsync(wholeBoard);
-                        ///////////////////////////////////////666666666666
+                        SendThisPosition();
 
                         CheckForMateOrStale(team2, game.board.pieces, clickedPiece);
 
@@ -919,6 +936,8 @@ namespace Chess
             {
                 
             }
+
+            game.hasStarted = true;
 
             if (!promotion)
             {
@@ -953,7 +972,7 @@ namespace Chess
                         if (c.x == 3)
                         {
                             Piece rook = game.board.PieceFromCoordinate(new Coordinate(1, 8));
-                            rook.pos.x = 6;
+                            rook.pos.x = 4;
                         }
                     }
                     else
@@ -966,7 +985,7 @@ namespace Chess
                         if (c.x == 3)
                         {
                             Piece rook = game.board.PieceFromCoordinate(new Coordinate(1, 1));
-                            rook.pos.x = 6;
+                            rook.pos.x = 4;
                         }
                     }
                     
@@ -1033,7 +1052,7 @@ namespace Chess
                             }
                             else
                             {
-                                if (p.pos.y == 9)
+                                if (p.pos.y == 8)
                                 {
                                     promotion = true;
                                     game.state = "promotion";
@@ -1050,41 +1069,7 @@ namespace Chess
 
             if (game.state != "promotion")
             {
-                /////////////666666666666666666666666
-                string wholeBoard = "movePiece*" + game.board.pieces.Count() + "#";
-
-                foreach (Piece pieceMoving in game.board.pieces)
-                {
-
-                    int hasMoved, possibleEnPassant, team;
-                    if (pieceMoving.hasMoved)
-                    {
-                        hasMoved = 1;
-                    }
-                    else
-                    {
-                        hasMoved = 0;
-                    }
-                    if (pieceMoving.possiblePassant)
-                    {
-                        possibleEnPassant = 1;
-                    }
-                    else
-                    {
-                        possibleEnPassant = 0;
-                    }
-                    if (pieceMoving.team)
-                    {
-                        team = 1;
-                    }
-                    else
-                    {
-                        team = 0;
-                    }
-                    wholeBoard += pieceMoving.pos.x.ToString() + pieceMoving.pos.y.ToString() + pieceMoving.type + hasMoved.ToString() + possibleEnPassant.ToString() + team.ToString();
-                }
-                client.SendAsync(wholeBoard);
-                ///////////////////////////////////////666666666666
+                SendThisPosition();
             }
 
             return false;
@@ -1195,17 +1180,38 @@ namespace Chess
             if (winner) //white
             {
                 CheckmateSound();
+                dispatcherTimer.Stop();
+                if (game.player1Color)
+                {
+                    SendThisPosition();
+                    Wait(1);
+                    client.Send("gameFinished*white");
+                }                
                 MessageBox.Show("Checkmate, white wins!");
             }
             else
             {
                 CheckmateSound();
+                dispatcherTimer.Stop();
+                if (!game.player1Color)
+                {
+                    SendThisPosition();
+                    Wait(1);
+                    client.Send("gameFinished*black");
+                }                
                 MessageBox.Show("Checkmate, black wins!");
             }
         }
         private void StalemateSound()
         {
+            dispatcherTimer.Stop();
             SoundPlayer audio = new SoundPlayer(Properties.Resources.stalemate);
+            if (game.player1Color)
+            {
+                SendThisPosition();
+                Wait(1);
+                client.Send("gameFinished*none");
+            }            
             audio.Play();
         }
         private void TakePieceSound()
@@ -1237,9 +1243,97 @@ namespace Chess
             DrawPiecesOnBoard(game.board.pieces);
             DrawCells(game);
         }
-        
+
+        void SendThisPosition()
+        {
+            string wholeBoard = "";
+
+            foreach (Piece pieceMoving in game.board.pieces)
+            {
+
+                int hasMoved, possibleEnPassant, team;
+                if (pieceMoving.hasMoved)
+                {
+                    hasMoved = 1;
+                }
+                else
+                {
+                    hasMoved = 0;
+                }
+                if (pieceMoving.possiblePassant)
+                {
+                    possibleEnPassant = 1;
+                }
+                else
+                {
+                    possibleEnPassant = 0;
+                }
+                if (pieceMoving.team)
+                {
+                    team = 1;
+                }
+                else
+                {
+                    team = 0;
+                }
+                wholeBoard += pieceMoving.pos.x.ToString() + pieceMoving.pos.y.ToString() + pieceMoving.type + hasMoved.ToString() + possibleEnPassant.ToString() + team.ToString();
+            }
+            client.Send("movePiece*" + game.board.pieces.Count() + "#" + wholeBoard + "!" + timer.p1Time.ToString() + "_" + timer.p2Time.ToString());
+            ///////////////////////////////////////666666666666
+        }
+
+        private void dispatcherTimer_Tick(object sender, EventArgs e)
+        {
+            if (game.hasStarted)
+            {
+                if (game.turn)
+                {
+                    timer.p1Time--;
+                }
+                else
+                {
+                    timer.p2Time--;
+                }
+            }
+            timerBlack.Content = timer.TimeString(timer.p2Time);
+            timerWhite.Content = timer.TimeString(timer.p1Time);
+
+            if (timer.p1Time == 0)
+            {
+                dispatcherTimer.Stop();
+                if (game.player1Color)
+                {
+                    SendThisPosition();
+                    Wait(1);
+                    client.Send("gameFinished*white");
+                }                
+            }
+            if (timer.p2Time == 0)
+            {
+                dispatcherTimer.Stop();
+                if (!game.player1Color)
+                {
+                    SendThisPosition();
+                    Wait(1);
+                    client.Send("gameFinished*black");
+                }
+                
+            }
+        }
+        /// <summary>
+        /// WPF Wait
+        /// </summary>
+        /// <param name="seconds"></param>
+        public static void Wait(double seconds) //https://stackoverflow.com/questions/21547678/making-a-thread-wait-two-seconds-before-continuing-in-c-sharp-wpf
+        {
+            var frame = new DispatcherFrame();
+            new Thread((ThreadStart)(() =>
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(seconds));
+                frame.Continue = false;
+            })).Start();
+            Dispatcher.PushFrame(frame);
+        }
 
     }
-    
-
 }

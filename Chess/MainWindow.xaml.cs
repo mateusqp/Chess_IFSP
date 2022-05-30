@@ -77,7 +77,7 @@ namespace Chess
                 string usersOnline = data.Split('#')[1];
                 data = data.Split('#')[0];
                 data = data.Split('*')[1];
-                user1.name = data.Split('!')[0];
+                user1.name = data.Split('!')[0];                
                 user1.rating = Convert.ToInt32(data.Split('!')[1]);
                 WaitingRoom waitingRoom = new WaitingRoom(user1, client, usersOnline);
                 Hide();
@@ -100,6 +100,11 @@ namespace Chess
             
 
             //MessageBox.Show("User name:" + user.name);
+        }
+
+        private async void createAcc_click(object sender, RoutedEventArgs e)
+        {
+            
         }
 
         private async void login_click(object sender, RoutedEventArgs e)
@@ -203,10 +208,6 @@ namespace Chess
             }
             
         }
-
-
-
-        
 
     }
 

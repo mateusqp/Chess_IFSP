@@ -9,7 +9,7 @@ namespace Chess.GameMechanics
     public class Game
     {
         public Notation notation;
-        public Timer timer;
+        public ChessTimer timer;
         public Board board;
         public Player player1;
         public Player player2;
@@ -17,8 +17,9 @@ namespace Chess.GameMechanics
         public bool running;
         public bool turn; //false = black's turn; true = white's turn
         public string state; //selectPiece, selectCoordinate
+        public bool hasStarted; //first move        
 
-        public Game(Timer timer, bool player1Color, Player player1, Player player2)
+        public Game(ChessTimer timer, bool player1Color, Player player1, Player player2)
         {
             this.timer = timer;
             board = new Board(player1Color);
@@ -27,6 +28,7 @@ namespace Chess.GameMechanics
             this.player2 = player2;
             turn = true;
             state = "selectPiece";
+            hasStarted = false;
             
         }
 
