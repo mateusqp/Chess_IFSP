@@ -33,6 +33,8 @@ namespace Chess
         bool promotion = false;
         //-
         public GameMechanics.Game game;
+        bool viewer;
+        bool v_turn = true; //viewer turn
 
         Player p1 = new();
         Player p2 = new();
@@ -44,12 +46,15 @@ namespace Chess
 
         List<Piece> promotionPieces = new List<Piece>();
 
-        public GameWindow(SimpleTcpClient client, User user1, User user2, bool player1Color, WaitingRoom wr)
+        public GameWindow(SimpleTcpClient client, User user1, User user2, bool player1Color, WaitingRoom wr, bool viewer)
         {
             InitializeComponent();
 
-            this.wr = wr;
+            grid.Children.Remove(drawBtn);
+            grid.Children.Remove(resignBtn);
 
+            this.wr = wr;
+            this.viewer = viewer;
             timer = new Chess.GameMechanics.ChessTimer();
 
             dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
@@ -97,21 +102,7 @@ namespace Chess
 
         void Disconnected(object sender, ConnectionEventArgs e)
         {
-            if (game.player1Color)
-            {
-                SendThisPosition();
-                Wait(1);
-                client.Send("gameFinished*black");
-            }
-            else
-            {
-                SendThisPosition();
-                Wait(1);
-                client.Send("gameFinished*white");
-            }
-            wr.btnFindMatch.IsEnabled = true;
-            wr.Show();
-            wr.gameHasStarted = false;
+            
         }
         void DataReceived(object sender, DataReceivedEventArgs e)
         {
@@ -127,11 +118,18 @@ namespace Chess
 
         void GetData(string data, string userIP) ////////////////////////////////// GET DATA /////////////////////////////////////
         {
+            
+            if (data.Contains("gameResignR*") && game.running)
+            {
+                game.running = false;
+                MessageBox.Show("Win by resignation");                                
+            }
+
             //"movePieceR*" + game.board.pieces.Count() + "#" + "!" + timer.p1Time.ToString() + "_" + timer.p2Time.ToString();
             if (data.Contains("movePieceR*")) //server reply
             {
                 game.hasStarted = true;
-                if (game.turn != game.player1Color)
+                if (game.turn != game.player1Color || viewer)
                 {
                     game.board.pieces.Clear();
                     game.board.cells.Clear();
@@ -141,6 +139,18 @@ namespace Chess
                     data = data.Split('!')[0];
                     int noPecas = Convert.ToInt32(data.Split('#')[0]);
                     data = data.Split('#')[1];
+
+                    if (v_turn)
+                    {
+                        v_turn = false;
+                    }
+                    else
+                    {
+                        v_turn = true;
+                    }
+
+                    data = data.Split('_')[0];
+                    
 
                     sbyte x = -1;
                     sbyte y = -1;
@@ -698,64 +708,67 @@ namespace Chess
         public void DrawCells(GameMechanics.Game game) // -- NOT THE BOARD CELLS, Cells for CLICKABLE rectangles, Also adds the Rectangles///
         {
             game.board.clickableRects.Clear();
-
-            foreach (Cell cell in game.board.cells)
+            if (!viewer)
             {
-                Rectangle r = new Rectangle();
-                SolidColorBrush brush = new SolidColorBrush();
-                Coordinate invertCoord = new Coordinate(cell.x + 1, cell.y + 1);
-                if (!game.player1Color && cell.x < 9)
+                foreach (Cell cell in game.board.cells)
                 {
-                    invertCoord = InvertCoordinate(invertCoord);
+                    Rectangle r = new Rectangle();
+                    SolidColorBrush brush = new SolidColorBrush();
+                    Coordinate invertCoord = new Coordinate(cell.x + 1, cell.y + 1);
+                    if (!game.player1Color && cell.x < 9)
+                    {
+                        invertCoord = InvertCoordinate(invertCoord);
+                    }
+                    else
+                    {
+                        invertCoord = new Coordinate(cell.x - 1, cell.y - 1);
+                    }
+                    Grid.SetColumn(r, invertCoord.x);
+                    Grid.SetRow(r, invertCoord.y);
+
+
+                    if (cell.color == "Invisible")
+                    {
+                        brush.Color = Colors.White;
+                        r.Fill = brush;
+                        r.Opacity = 0;
+
+                    }
+                    if (cell.color == "Red")
+                    {
+                        brush.Color = Colors.Red;
+                        r.Fill = brush;
+                        r.Opacity = 0.2;
+
+                    }
+                    if (cell.color == "Blue")
+                    {
+                        brush.Color = Colors.LightBlue;
+                        r.Fill = brush;
+                        r.Opacity = 0.4;
+
+                    }
+                    if (cell.color == "BluePromotion")
+                    {
+                        brush.Color = Colors.LightBlue;
+                        r.Fill = brush;
+                        r.Opacity = 0.2;
+
+                    }
+
+                    grid.Children.Add(r);
+
+                    r.MouseDown += new MouseButtonEventHandler(ClickOnPiece);
+
+                    game.board.clickableRects.Add(r);
                 }
-                else
-                {
-                    invertCoord = new Coordinate(cell.x - 1, cell.y - 1);
-                }
-                Grid.SetColumn(r, invertCoord.x);
-                Grid.SetRow(r, invertCoord.y);
-
-
-                if (cell.color == "Invisible")
-                {
-                    brush.Color = Colors.White;
-                    r.Fill = brush;
-                    r.Opacity = 0;
-
-                }
-                if (cell.color == "Red")
-                {
-                    brush.Color = Colors.Red;
-                    r.Fill = brush;
-                    r.Opacity = 0.2;
-
-                }
-                if (cell.color == "Blue")
-                {
-                    brush.Color = Colors.LightBlue;
-                    r.Fill = brush;
-                    r.Opacity = 0.4;
-
-                }
-                if (cell.color == "BluePromotion")
-                {
-                    brush.Color = Colors.LightBlue;
-                    r.Fill = brush;
-                    r.Opacity = 0.2;
-
-                }
-
-                grid.Children.Add(r);
-
-                r.MouseDown += new MouseButtonEventHandler(ClickOnPiece);
-
-                game.board.clickableRects.Add(r);
             }
+            
         }
 
         private void ClickOnPiece(object sender, MouseButtonEventArgs e)
         {
-            if (game.player1Color == game.turn)
+            if (game.player1Color == game.turn && !viewer)
             {
                 //Detects Piece and Coordinate
                 Coordinate clickedCoordinate = new Coordinate();
@@ -1166,6 +1179,13 @@ namespace Chess
         private void Stalemate()
         {
             StalemateSound();
+            if (game.player1Color && !viewer)
+            {
+                SendThisPosition();
+                Wait(1);
+                client.Send("gameFinished*none");
+                game.running = false;
+            }
             grid.Children.Remove(drawBtn);
             grid.Children.Remove(resignBtn);
             MessageBox.Show("Stalemate, draw!");
@@ -1179,39 +1199,43 @@ namespace Chess
             game.state = "over";
             if (winner) //white
             {
-                CheckmateSound();
-                dispatcherTimer.Stop();
-                if (game.player1Color)
+                if (!viewer)
                 {
-                    SendThisPosition();
-                    Wait(1);
-                    client.Send("gameFinished*white");
-                }                
+                    CheckmateSound();
+                    dispatcherTimer.Stop();
+                    if (game.player1Color)
+                    {
+                        SendThisPosition();
+                        Wait(1);
+                        client.Send("gameFinished*white");
+                        game.running = false;
+                    }
+                }                                
                 MessageBox.Show("Checkmate, white wins!");
             }
             else
             {
-                CheckmateSound();
-                dispatcherTimer.Stop();
-                if (!game.player1Color)
+                if (!viewer)
                 {
-                    SendThisPosition();
-                    Wait(1);
-                    client.Send("gameFinished*black");
-                }                
-                MessageBox.Show("Checkmate, black wins!");
+                    CheckmateSound();
+                    dispatcherTimer.Stop();
+                    if (!game.player1Color)
+                    {
+                        SendThisPosition();
+                        Wait(1);
+                        client.Send("gameFinished*black");
+                        game.running = false;
+                    }
+                    MessageBox.Show("Checkmate, black wins!");
+                }
+                
             }
         }
         private void StalemateSound()
         {
             dispatcherTimer.Stop();
             SoundPlayer audio = new SoundPlayer(Properties.Resources.stalemate);
-            if (game.player1Color)
-            {
-                SendThisPosition();
-                Wait(1);
-                client.Send("gameFinished*none");
-            }            
+                       
             audio.Play();
         }
         private void TakePieceSound()
@@ -1232,7 +1256,7 @@ namespace Chess
         void ReDraw()
         {
             grid.Children.Clear();
-            if (game.running)
+            if (game.running && !viewer)
             {
                 grid.Children.Add(drawBtn);
                 grid.Children.Add(resignBtn);
@@ -1241,10 +1265,10 @@ namespace Chess
             grid.Children.Add(timerWhite);
             DrawBoard();
             DrawPiecesOnBoard(game.board.pieces);
-            DrawCells(game);
+            DrawCells(game);            
         }
 
-        void SendThisPosition()
+        async void SendThisPosition()
         {
             string wholeBoard = "";
 
@@ -1278,13 +1302,13 @@ namespace Chess
                 }
                 wholeBoard += pieceMoving.pos.x.ToString() + pieceMoving.pos.y.ToString() + pieceMoving.type + hasMoved.ToString() + possibleEnPassant.ToString() + team.ToString();
             }
-            client.Send("movePiece*" + game.board.pieces.Count() + "#" + wholeBoard + "!" + timer.p1Time.ToString() + "_" + timer.p2Time.ToString());
+            await client.SendAsync("movePiece*" + game.board.pieces.Count() + "#" + wholeBoard + "!" + timer.p1Time.ToString() + "_" + timer.p2Time.ToString());
             ///////////////////////////////////////666666666666
         }
 
         private void dispatcherTimer_Tick(object sender, EventArgs e)
         {
-            if (game.hasStarted)
+            if (game.hasStarted && game.running && !viewer)
             {
                 if (game.turn)
                 {
@@ -1295,10 +1319,23 @@ namespace Chess
                     timer.p2Time--;
                 }
             }
+
+            if (viewer && game.running)
+            {
+                if (v_turn)
+                {
+                    timer.p1Time--;
+                }
+                else
+                {
+                    timer.p2Time--;
+                }
+            }
+
             timerBlack.Content = timer.TimeString(timer.p2Time);
             timerWhite.Content = timer.TimeString(timer.p1Time);
 
-            if (timer.p1Time == 0)
+            if (timer.p1Time == 0 && !viewer)
             {
                 dispatcherTimer.Stop();
                 if (game.player1Color)
@@ -1306,9 +1343,10 @@ namespace Chess
                     SendThisPosition();
                     Wait(1);
                     client.Send("gameFinished*white");
+                    game.running = false;
                 }                
             }
-            if (timer.p2Time == 0)
+            if (timer.p2Time == 0 && !viewer)
             {
                 dispatcherTimer.Stop();
                 if (!game.player1Color)
@@ -1316,6 +1354,7 @@ namespace Chess
                     SendThisPosition();
                     Wait(1);
                     client.Send("gameFinished*black");
+                    game.running = false;
                 }
                 
             }
@@ -1335,5 +1374,23 @@ namespace Chess
             Dispatcher.PushFrame(frame);
         }
 
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (game.player1Color && game.running && !viewer)
+            {
+                SendThisPosition();
+                Wait(1.0);
+                client.Send("gameFinishedResign*black");
+            }
+            if (!game.player1Color && game.running && !viewer)
+            {
+                SendThisPosition();
+                Wait(1.0);
+                client.Send("gameFinishedResign*white");
+            }
+            wr.btnFindMatch.IsEnabled = true;
+            wr.Show();
+            wr.gameHasStarted = false;
+        }
     }
 }

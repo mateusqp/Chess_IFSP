@@ -8,7 +8,7 @@
         xmlns:local="clr-namespace:Chess"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="Chess" Height="700" Width="700">
+        Title="Chess" Height="700" Width="700" Closing="Window_Closing">
 
 
     

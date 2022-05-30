@@ -92,38 +92,30 @@ namespace Chess
         {
             if (data.Contains("watchR*"))
             {
+                MessageBox.Show("watchR ok");
                 data = data.Split('*')[1];
+                //sqlName0!sqlName1#rating1_rating2
+                string ratingsString = data.Split('#')[1];
+                data = data.Split('#')[0];
                 labelLoadingGame.Visibility = Visibility.Collapsed;
                 User user2 = new User();
                 User viewer = new User();
 
                 string vName = data.Split('!')[0];
-                string vRating = data.Split('!')[1];
+                //string vRating = data.Split('!')[1];
 
                 viewer.name = vName;
-                viewer.rating = Convert.ToInt32(vRating);
+                viewer.rating = Convert.ToInt32(ratingsString.Split('_')[0]);
                 viewer.login = "v";
-
-                data = data.Split('*')[1];
-                string name2 = data.Split('!')[0];
-                data = data.Split('!')[1];
-                string rating2 = data.Split('#')[0];
-                data = data.Split('#')[1];
-
-                bool player1Color = true;
-
-                if (data == "1")
-                {
-                    player1Color = true;
-                }
-                else
-                {
-                    player1Color = false;
-                }
+                
+                string name2 = data.Split('!')[1];
+                
+                //string rating2 = data.Split('#')[0];
+                
 
                 user2.name = name2;
-                user2.rating = Convert.ToInt32(rating2);
-                GameWindow game = new GameWindow(client, viewer, user2, player1Color, this);
+                user2.rating = Convert.ToInt32(ratingsString.Split('_')[1]);
+                GameWindow game = new GameWindow(client, viewer, user2, true, this, true);
                 this.Hide();
                 game.Show();
                 gameHasStarted = true;
@@ -168,7 +160,7 @@ namespace Chess
 
                 user2.name = name2;
                 user2.rating = Convert.ToInt32(rating2);
-                GameWindow game = new GameWindow(client, user1, user2, player1Color, this);
+                GameWindow game = new GameWindow(client, user1, user2, player1Color, this, false);
                 this.Hide();
                 game.Show();
                 gameHasStarted = true;
@@ -187,7 +179,7 @@ namespace Chess
 
                 user2.name = name2;
                 user2.rating = Convert.ToInt32(rating2);
-                GameWindow game = new GameWindow(client, user1, user2, false, this); //////////////////////TESTING CHANGE COLOR;
+                GameWindow game = new GameWindow(client, user1, user2, false, this, false); //////////////////////TESTING CHANGE COLOR;
                 this.Hide();
                 game.Show();
                 gameHasStarted = true;
@@ -328,7 +320,7 @@ namespace Chess
                                 {
                                     i = selectedGame.Count();
                                 }
-                            }
+                            }                            
                             client.Send("watch*" + selectedGame);
                         }
                     }
