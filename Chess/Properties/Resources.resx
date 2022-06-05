@@ -118,8 +118,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="check" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\soundeffects\piece-fall.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="checkmate" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\soundeffects\checkmate.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\soundeffects\test\c_win.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Chess_bdt60" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\PiecesPng\Chess_bdt60.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -157,13 +160,19 @@
   <data name="Chess_rlt60" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\PiecesPng\Chess_rlt60.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="piece_fall" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\soundeffects\piece-fall.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="c_START" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\soundeffects\test\c_START.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="piece_slide" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="c_WinByResign" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\soundeffects\test\c_WinByResign.WAV;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="piece_fall" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\soundeffects\piece-slide.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="piece_slide" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\soundeffects\test\c_Move_Piece (4).WAV;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="stalemate" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\soundeffects\stalemate.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\soundeffects\test\c_stalemate.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

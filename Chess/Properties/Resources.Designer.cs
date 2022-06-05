@@ -63,6 +63,33 @@ namespace Chess.Properties {
         /// <summary>
         ///   Consulta um recurso localizado do tipo System.IO.UnmanagedMemoryStream semelhante a System.IO.MemoryStream.
         /// </summary>
+        public static System.IO.UnmanagedMemoryStream c_START {
+            get {
+                return ResourceManager.GetStream("c_START", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.IO.UnmanagedMemoryStream semelhante a System.IO.MemoryStream.
+        /// </summary>
+        public static System.IO.UnmanagedMemoryStream c_WinByResign {
+            get {
+                return ResourceManager.GetStream("c_WinByResign", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.IO.UnmanagedMemoryStream semelhante a System.IO.MemoryStream.
+        /// </summary>
+        public static System.IO.UnmanagedMemoryStream check {
+            get {
+                return ResourceManager.GetStream("check", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Consulta um recurso localizado do tipo System.IO.UnmanagedMemoryStream semelhante a System.IO.MemoryStream.
+        /// </summary>
         public static System.IO.UnmanagedMemoryStream checkmate {
             get {
                 return ResourceManager.GetStream("checkmate", resourceCulture);

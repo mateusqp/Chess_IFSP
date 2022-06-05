@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Media;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Chess
 {
@@ -26,6 +29,9 @@ namespace Chess
         public WaitingRoom(User user, SimpleTcpClient client, string usersOnline)
         {
             InitializeComponent();
+
+            lstRankList.Items.Add("RANKING");
+            lstPlayerInfo.Items.Add("USER INFO");
 
             gameHasStarted = false;
             this.client = client;
@@ -90,6 +96,11 @@ namespace Chess
 
         void GetData(string data, string userIP) ///////////////////////////////////////GET DATA //////////////////
         {
+            
+            if (data.Contains("challengeRejectR"))
+            {
+                NotFindingMatch();
+            }
             if (data.Contains("watchR*"))
             {
                 //MessageBox.Show("watchR ok");
@@ -123,21 +134,28 @@ namespace Chess
 
             if (data.Contains("challengeR*"))
             {
+                NotFindingMatch();
+                btnFindMatch.IsEnabled = false;
                 string user1Name = data.Split('*')[1];
                 if (MessageBox.Show("The user " + user1Name + " is challenging you. Accept Challenge?", "Challenge", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 {
                     //do no stuff
-                    client.Send("challengeReject*" + user1.name); //this is user2 in the challenge tho, careful!
+                    client.Send("challengeReject*" + user1.login); //this is user2 in the challenge tho, careful!
+                    NotFindingMatch();
+
                 }
                 else
                 {
                     //do yes stuff
-                    client.Send("challengeAccept*" + user1.name); //this is user2 in the challenge tho, careful!                    
+                    client.Send("challengeAccept*" + user1.login); //this is user2 in the challenge tho, careful!
+                    Wait(0.2);
+                    NotFindingMatch();
                 }
             }
 
             if (data.Contains("gameStart*"))
             {
+                
                 labelLoadingGame.Visibility = Visibility.Collapsed;
                 User user2 = new User();
 
@@ -168,6 +186,7 @@ namespace Chess
 
             if (data.Contains("gameStart2*")) //JUST FOR TESTING // REMOVE LATER
             {
+                
                 labelLoadingGame.Visibility = Visibility.Collapsed;
                 User user2 = new User();
 
@@ -248,30 +267,37 @@ namespace Chess
         }
         private void listBox1_MouseRightClick(object sender, MouseButtonEventArgs e)
         {
-            if (!gameHasStarted)
+            //Challenge click event removed
+            if (false)
             {
-                try
+                NotFindingMatch();
+                btnFindMatch.IsEnabled = false;
+                if (!gameHasStarted)
                 {
-                    if (playersList.SelectedItem != null && playersList.SelectedItem.ToString() != user1.name)
+                    try
                     {
-                        string selectedPlayer = playersList.SelectedItem.ToString();
+                        if (playersList.SelectedItem != null && playersList.SelectedItem.ToString() != user1.name)
+                        {
+                            string selectedPlayer = playersList.SelectedItem.ToString();
 
-                        if (MessageBox.Show("Do you want to challenge " + selectedPlayer + "?", "Challenge", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
-                        {
-                            //do no stuff
-                        }
-                        else
-                        {
-                            //do yes stuff
-                            client.Send("challenge*" + selectedPlayer);
+                            if (MessageBox.Show("Do you want to challenge " + selectedPlayer + "?", "Challenge", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                            {
+                                //do no stuff
+                            }
+                            else
+                            {
+                                //do yes stuff
+                                client.Send("challenge*" + selectedPlayer);
+                            }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
+                    catch (Exception ex)
+                    {
 
+                    }
                 }
             }
+            
         }
 
         private async void btnFindMatch_Click(object sender, RoutedEventArgs e)
@@ -281,6 +307,18 @@ namespace Chess
             await Task.Delay(1000);
             await client.SendAsync("findingMatch*");
             labelLoadingGame.Visibility = Visibility.Visible;
+            btnStopFindMatch.Visibility = Visibility.Visible;
+        }
+
+        private async void btnStopFindMatch_Click(object sender, RoutedEventArgs e)
+        {
+
+            user1.findingMatch = false;
+            btnFindMatch.IsEnabled = true;
+            await Task.Delay(20);
+            
+            labelLoadingGame.Visibility = Visibility.Collapsed;
+            btnStopFindMatch.Visibility = Visibility.Collapsed;
         }
 
         private void loadingLabelTimer_Tick(object sender, EventArgs e)
@@ -291,9 +329,29 @@ namespace Chess
                 labelLoadingGame.Content = "Finding Match ";
             }
         }
-
-        private void watchGame_click(object sender, MouseButtonEventArgs e)
+        void NotFindingMatch()
         {
+            client.Send("findingMatchStop*");
+            btnFindMatch.IsEnabled = true;
+            user1.findingMatch = false;
+            btnStopFindMatch.Visibility = Visibility.Collapsed;
+            labelLoadingGame.Visibility = Visibility.Collapsed;
+            
+        }
+        public static void Wait(double seconds) //https://stackoverflow.com/questions/21547678/making-a-thread-wait-two-seconds-before-continuing-in-c-sharp-wpf
+        {
+            var frame = new DispatcherFrame();
+            new Thread((ThreadStart)(() =>
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(seconds));
+                frame.Continue = false;
+            })).Start();
+            Dispatcher.PushFrame(frame);
+        }
+        private void watchGame_click(object sender, MouseButtonEventArgs e)
+        {            
+            NotFindingMatch();
+            
             if (!gameHasStarted)
             {
                 try

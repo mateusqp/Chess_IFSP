@@ -50,6 +50,11 @@ namespace Chess
         {
             InitializeComponent();
 
+            
+
+            wr.btnFindMatch.IsEnabled = false;
+            wr.btnStopFindMatch.Visibility = Visibility.Collapsed;
+
             grid.Children.Remove(drawBtn);
             grid.Children.Remove(resignBtn);
 
@@ -66,6 +71,12 @@ namespace Chess
 
             p1 = new Player();
             p2 = new Player();
+
+            if (!viewer)
+            {
+                SoundPlayer audio = new SoundPlayer(Properties.Resources.c_START);
+                audio.Play();
+            }
 
             promotion = false;
 
@@ -126,7 +137,10 @@ namespace Chess
             if (data.Contains("gameResignR*") && game.running)
             {
                 game.running = false;
-                MessageBox.Show("Win by resignation");                                
+                Wait(0.5);
+                SoundPlayer audio = new SoundPlayer(Properties.Resources.c_WinByResign);
+                audio.Play();
+                MessageBox.Show("Win by resignation");
             }
 
             //"movePieceR*" + game.board.pieces.Count() + "#" + "!" + timer.p1Time.ToString() + "_" + timer.p2Time.ToString()+1_True;
@@ -1185,13 +1199,14 @@ namespace Chess
         }
         private void Stalemate()
         {
+            game.running = false;
             StalemateSound();
             if (game.player1Color && !viewer)
             {
                 SendThisPosition();
                 Wait(1);
                 client.Send("gameFinished*none");
-                game.running = false;
+                
             }
             grid.Children.Remove(drawBtn);
             grid.Children.Remove(resignBtn);
