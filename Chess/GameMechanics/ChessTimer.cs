@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Chess.GameMechanics
 {
     public class ChessTimer
-    {        
+    {
         public float increment { get; set; }
         public int p1Time { get; set; }
         public int p2Time { get; set; }

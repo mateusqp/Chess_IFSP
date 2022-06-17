@@ -29,13 +29,16 @@ namespace Chess
         User user1 { get; set; }
         User user2 { get; set; }
         bool player1Color { get; set; }
-        public string hostIP_ { get; set; }
+        public string hostIP_ { get; set; }        
 
         SimpleTcpClient client { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
+            this.Hide();
+            
+
             user1 = new User();
             user2 = new User();
             player1Color = false;
@@ -43,7 +46,8 @@ namespace Chess
             
             user1.name = null;
 
-            
+            GetHostIP get = new GetHostIP(this);
+            get.Show();
         }
 
         static void Connected(object sender, ConnectionEventArgs e)
@@ -77,9 +81,9 @@ namespace Chess
                 string usersOnline = data.Split('#')[1];
                 data = data.Split('#')[0];
                 data = data.Split('*')[1];
-                user1.name = data.Split('!')[0];                
+                user1.name = data.Split('!')[0];
                 user1.rating = Convert.ToInt32(data.Split('!')[1]);
-                WaitingRoom waitingRoom = new WaitingRoom(user1, client, usersOnline);
+                WaitingRoom waitingRoom = new WaitingRoom(user1, client, usersOnline, this);
                 Hide();
                 waitingRoom.Show();
                 
@@ -87,7 +91,7 @@ namespace Chess
 
             if (data.Contains("loginRFail*"))
             {
-                client.Disconnect();
+                //client.Disconnect();
                 loginBtn.IsEnabled = true;
             }
 
@@ -102,8 +106,11 @@ namespace Chess
             //MessageBox.Show("User name:" + user.name);
         }
 
-        private async void createAcc_click(object sender, RoutedEventArgs e)
+        private void createAcc_click(object sender, RoutedEventArgs e)
         {
+            Hide();
+            CreateAccount createAccount = new CreateAccount(this, this.client);
+            createAccount.Show();
             
         }
 
@@ -113,7 +120,7 @@ namespace Chess
             if (txtLogin.Text.Length > 5 && txtLogin.Text.Length < 13 && txtPass.Text.Length > 5 && txtPass.Text.Length < 13)
             {
                 loginBtn.IsEnabled = false;
-                hostIP_ = txtHost.Text;
+                //hostIP_ = txtHost.Text;
                 if (hostIP_ == "")
                 {
                     hostIP_ = "127.0.0.1";

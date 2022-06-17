@@ -42,7 +42,8 @@ namespace Chess
         WaitingRoom wr { get; set; }
 
         System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-        
+
+        string login;
 
         List<Piece> promotionPieces = new List<Piece>();
 
@@ -50,7 +51,7 @@ namespace Chess
         {
             InitializeComponent();
 
-            
+            this.login = wr.user1.login;
 
             wr.btnFindMatch.IsEnabled = false;
             wr.btnStopFindMatch.Visibility = Visibility.Collapsed;
@@ -135,11 +136,11 @@ namespace Chess
         {
             
             if (data.Contains("gameResignR*") && game.running)
-            {
+            {                
                 game.running = false;
                 Wait(0.5);
                 SoundPlayer audio = new SoundPlayer(Properties.Resources.c_WinByResign);
-                audio.Play();
+                audio.Play();                
                 MessageBox.Show("Win by resignation");
             }
 
@@ -1406,14 +1407,18 @@ namespace Chess
             if (game.player1Color && game.running && !viewer)
             {
                 SendThisPosition();
-                Wait(1.0);
+                Wait(0.5);
                 client.Send("gameFinishedResign*black");
+                Wait(0.3);
+                client.Send("UpdateRating*" + login);
             }
             if (!game.player1Color && game.running && !viewer)
             {
                 SendThisPosition();
-                Wait(1.0);
+                Wait(0.5);
                 client.Send("gameFinishedResign*white");
+                Wait(0.3);
+                client.Send("UpdateRating*" + login);
             }
             wr.btnFindMatch.IsEnabled = true;
             wr.Show();

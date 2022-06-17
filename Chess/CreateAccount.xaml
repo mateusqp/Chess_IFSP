@@ -1,0 +1,38 @@
+﻿<Window x:Class="Chess.CreateAccount"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Chess"
+        mc:Ignorable="d"
+        Title="CreateAccount" Height="450" Width="800">
+    <Grid Unloaded="Grid_Unloaded">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Label Content="Account Creation" FontWeight="Bold" FontSize="14" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0" Margin="10"/>
+        <Label Content="Name:" FontSize="13" Grid.Row="2" Grid.ColumnSpan="1" Grid.Column="0" Margin="200,10,10,10"/>
+        <Label Content="Login:" FontSize="13" Grid.Row="3" Grid.ColumnSpan="1" Grid.Column="0" Margin="200,10,10,10"/>
+        <Label Content="Password:" FontSize="13" Grid.Row="4" Grid.ColumnSpan="1" Grid.Column="0" Margin="200,10,10,10"/>
+        <Label Content="Password Confirmation:" FontSize="13" Grid.Row="5" Grid.ColumnSpan="1" Grid.Column="0" Margin="200,10,10,10"/>
+
+        <TextBox Text="" Name="txtName" Grid.Row="2" Grid.ColumnSpan="1" Grid.Column="1" Margin="10,10,200,10" TextChanged="txtName_Changed"/>
+        <TextBox Text="" Name="txtUser" Grid.Row="3" Grid.ColumnSpan="1" Grid.Column="1" Margin="10,10,200,10" TextChanged="txtUser_Changed"/>
+        <TextBox Text="" Name="txtPass" FontFamily="Webdings" Grid.Row="4" Grid.ColumnSpan="1" Grid.Column="1" Margin="10,10,200,10" TextChanged="txtPass_Changed"/>
+        <TextBox Text="" Name="txtPassConf" FontFamily="Webdings" Grid.Row="5" Grid.ColumnSpan="1" Grid.Column="1" Margin="10,10,200,10" TextChanged="txtPass_Changed2"/>
+        <Button Content="Create" Name="btnCreate" Grid.Row="6" Grid.ColumnSpan="1" Grid.Column="1" Margin="10,10,200,10" Click="btnCreate_Click"/>
+        
+    </Grid>
+    
+</Window>

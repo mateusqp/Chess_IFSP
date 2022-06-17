@@ -23,19 +23,22 @@ namespace Chess
     /// </summary>
     public partial class WaitingRoom : Window
     {
-        User user1 { get; set; }
+        public User user1 { get; set; }
         SimpleTcpClient client { get; set; }
         public bool gameHasStarted { get; set; }
-        public WaitingRoom(User user, SimpleTcpClient client, string usersOnline)
+
+        MainWindow main;
+        public WaitingRoom(User user, SimpleTcpClient client, string usersOnline, MainWindow main)
         {
             InitializeComponent();
-
-            lstRankList.Items.Add("RANKING");
-            lstPlayerInfo.Items.Add("USER INFO");
-
+            this.main = main;
             gameHasStarted = false;
             this.client = client;
-            user1 = user;
+            user1 = user;            
+            lstPlayerInfo.Items.Add(user1.name);
+            lstPlayerInfo.Items.Add(user1.rating);
+
+            
 
             // set events
             client.Events.Connected += Connected;
@@ -96,6 +99,17 @@ namespace Chess
 
         void GetData(string data, string userIP) ///////////////////////////////////////GET DATA //////////////////
         {
+            if (data.Contains("UpdateRatingR*"))
+            {
+                data = data.Split('*')[1];
+                if (user1.login == data.Split('!')[0])
+                {
+                    user1.rating = Convert.ToInt32(data.Split('!')[1]);
+                    lstPlayerInfo.Items.Clear();
+                    lstPlayerInfo.Items.Add(user1.name);
+                    lstPlayerInfo.Items.Add(user1.rating);
+                }
+            }
             
             if (data.Contains("challengeRejectR"))
             {
@@ -388,6 +402,11 @@ namespace Chess
 
                 }
             }
+        }
+
+        private void Grid_Unloaded(object sender, RoutedEventArgs e)
+        {
+            main.Close();
         }
     }
 }

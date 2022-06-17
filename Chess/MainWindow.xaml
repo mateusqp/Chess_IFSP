@@ -49,13 +49,14 @@
         <Label Name="lblLogin" Content="Login:" Grid.Row="5" Grid.ColumnSpan="2" Grid.Column="2" Margin="10"/>
         <Label Name="lblPass" Content="Password:" Grid.Row="6" Grid.ColumnSpan="2" Grid.Column="2" Margin="10"/>
 
-        <Label Name="hostIP" Content="host IP:" Grid.Row="4" Grid.ColumnSpan="2" Grid.Column="2" Margin="10"/>
 
 
         <TextBox Text="tester" Name="txtLogin" Grid.Row="5" Grid.ColumnSpan="3" Grid.Column="4" Margin="10" TextChanged="txtLogin_changed"/>
         <TextBox FontFamily="WebDings" Text="tester" Name="txtPass" Grid.Row="6" Grid.ColumnSpan="3" Grid.Column="4" Margin="10" TextChanged="txtPass_changed"/>
 
-        <TextBox Text="192.168.0.11" Name="txtHost" Grid.Row="4" Grid.ColumnSpan="3" Grid.Column="4" Margin="10"/>
+        
+        <TextBox Visibility="Hidden"  Text="192.168.0.11" Name="txtHost" Grid.Row="4" Grid.ColumnSpan="3" Grid.Column="4" Margin="10"/>
+        <Label Visibility="Hidden" Name="hostIP" Content="host IP:" Grid.Row="4" Grid.ColumnSpan="2" Grid.Column="2" Margin="10"/>
 
 
     </Grid>

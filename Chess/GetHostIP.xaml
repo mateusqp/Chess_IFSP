@@ -1,0 +1,25 @@
+﻿<Window x:Class="Chess.GetHostIP"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Chess"
+        mc:Ignorable="d"
+        Title="GetHostIP" Height="450" Width="800">
+    <Grid Unloaded="Grid_Unloaded">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>            
+        </Grid.RowDefinitions>
+        <Label Content="Enter Host IP" FontSize="13" Grid.Row="1" Grid.ColumnSpan="1" Grid.Column="0" Margin="200,37,10,10"/>
+
+        <TextBox Text="" Name="txtIP" Grid.Row="1" Grid.ColumnSpan="1" Grid.Column="1" Margin="10,37,200,41"/>
+        <Button Content="Connect" Name="btnC" Grid.Row="2" Grid.ColumnSpan="1" Grid.Column="1" Margin="10,10,200,55" Click="btnC_Click"/>
+    </Grid>
+</Window>

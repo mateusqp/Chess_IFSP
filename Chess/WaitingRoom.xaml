@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Chess"
         mc:Ignorable="d"
         Title="WaitingRoom" Height="450" Width="800" Closed="Window_Closed">
-    <Grid>
+    <Grid Unloaded="Grid_Unloaded">
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
             <RowDefinition Height="30"/>
@@ -18,7 +18,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20"/>
             <ColumnDefinition Width="150"/>
-            <ColumnDefinition Name="midcol" Width="*"/>            
+            <ColumnDefinition Name="midcol" Width="*"/>
             <ColumnDefinition Width="150"/>
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
@@ -38,8 +38,12 @@
         <ListBox Name="gamesList" Grid.Row="2" Grid.Column="2" Panel.ZIndex="1" PreviewMouseRightButtonDown="watchGame_click"/>
         <ListBox  Name="playersList"  Grid.Row="2" Grid.Column="3" PreviewMouseRightButtonDown="listBox1_MouseRightClick" />
         <ListBox  Name="lstRankList"  Grid.Row="2" Grid.Column="1"
-                  VerticalAlignment="Top" Margin="5" Height="160"/>
+                  VerticalAlignment="Top" Margin="5,5,5,0" Height="180"/>
         <ListBox  Name="lstPlayerInfo" Grid.Row="2" Grid.Column="1" 
-                   VerticalAlignment="Bottom" Margin="5" Height="150"/>
-    </Grid>    
+                   VerticalAlignment="Bottom" Margin="10" Height="70"/>
+        <Label Width="100" FontSize="10" FontWeight="Bold" 
+               Content="User" Grid.Row="2" Grid.Column="1" Panel.ZIndex="1" Margin="25,190,25,85"/>
+        <Label Width="100" FontSize="10" FontWeight="Bold" 
+               Content="Ranking" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1"/>
+    </Grid>
 </Window>
