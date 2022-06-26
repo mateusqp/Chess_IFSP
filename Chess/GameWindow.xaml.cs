@@ -122,13 +122,13 @@ namespace Chess
         }
         void DataReceived(object sender, DataReceivedEventArgs e)
         {
-            //Console.WriteLine($"[{e.IpPort}] {Encoding.UTF8.GetString(e.Data)}");
+            
             string data = (Encoding.UTF8.GetString(e.Data));
 
             Dispatcher.Invoke(new Action(delegate
             {
                 GetData(data, e.IpPort);
-                //richTextBox1.Text += data;
+                
             }));
         }
 
