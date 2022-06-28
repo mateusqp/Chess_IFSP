@@ -1,5 +1,6 @@
 Preview:
 
+(Running server + 2 clients playing + 1 client watching)
 https://youtu.be/YHekRZVbtiY
 
 Server code not included in this project. Just the client.
